@@ -32,5 +32,6 @@ test\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 test\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 test\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 test\main.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdio.h
+test\main.o: ..\User\App\app_data.h
 test\main.o: ..\User\App\app_key.h
 test\main.o: ..\User\App\app_ui.h

@@ -1,6 +1,7 @@
 test\app_ui.o: ..\User\App\app_ui.c
 test\app_ui.o: ..\User\App\app_ui.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdint.h
+test\app_ui.o: ..\User\App\app_data.h
 test\app_ui.o: ..\User\OLED\ssd1306.h
 test\app_ui.o: ../Core/Inc/main.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
@@ -36,3 +37,4 @@ test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 test\app_ui.o: ..\User\OLED\ssd1306_conf.h
 test\app_ui.o: ..\User\OLED\ssd1306_fonts.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdbool.h
+test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdio.h

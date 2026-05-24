@@ -1,7 +1,10 @@
 #include "app_ui.h"
 
+#include "app_data.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
+
+#include <stdio.h>
 
 #define APP_UI_PAGE_COUNT 5U
 
@@ -11,6 +14,7 @@ static void AppUI_DrawWeather(void);
 static void AppUI_DrawAlarm(void);
 static void AppUI_DrawDevice(void);
 static void AppUI_Clear(void);
+static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, float value, const char *unit);
 
 void AppUI_Init(void)
 {
@@ -68,14 +72,23 @@ static void AppUI_DrawHome(void)
 
 static void AppUI_DrawEnvironment(void)
 {
+    SmartDesk_Data_t *data = AppData_Get();
+    char line[24];
+
     AppUI_Clear();
     ssd1306_WriteString("Environment", Font_7x10, White);
+
     ssd1306_SetCursor(0, 16);
-    ssd1306_WriteString("Temp: 26C", Font_7x10, White);
+    AppUI_FormatFloat1(line, sizeof(line), "Temp: ", data->temperature, "C");
+    ssd1306_WriteString(line, Font_7x10, White);
+
     ssd1306_SetCursor(0, 32);
-    ssd1306_WriteString("Humi: 55%", Font_7x10, White);
+    AppUI_FormatFloat1(line, sizeof(line), "Humi: ", data->humidity, "%");
+    ssd1306_WriteString(line, Font_7x10, White);
+
     ssd1306_SetCursor(0, 48);
-    ssd1306_WriteString("Gas : Normal", Font_7x10, White);
+    snprintf(line, sizeof(line), "Gas:%u Light:%u", data->gas_adc, data->light_adc);
+    ssd1306_WriteString(line, Font_7x10, White);
 }
 
 static void AppUI_DrawWeather(void)
@@ -104,12 +117,46 @@ static void AppUI_DrawAlarm(void)
 
 static void AppUI_DrawDevice(void)
 {
+    SmartDesk_Data_t *data = AppData_Get();
+    char line[24];
+
     AppUI_Clear();
     ssd1306_WriteString("Device", Font_7x10, White);
+
     ssd1306_SetCursor(0, 16);
-    ssd1306_WriteString("Fan: OFF", Font_7x10, White);
+    snprintf(line, sizeof(line), "Fan: %s", data->fan_on ? "ON" : "OFF");
+    ssd1306_WriteString(line, Font_7x10, White);
+
     ssd1306_SetCursor(0, 32);
-    ssd1306_WriteString("Light: OFF", Font_7x10, White);
+    snprintf(line, sizeof(line), "Light: %s", data->light_on ? "ON" : "OFF");
+    ssd1306_WriteString(line, Font_7x10, White);
+
     ssd1306_SetCursor(0, 48);
-    ssd1306_WriteString("OLED: OK", Font_7x10, White);
+    snprintf(line, sizeof(line), "Alm:%s Score:%u", data->alarm_on ? "ON" : "OFF", data->comfort_score);
+    ssd1306_WriteString(line, Font_7x10, White);
+}
+
+static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, float value, const char *unit)
+{
+    int16_t scaled;
+    int16_t integer;
+    int16_t decimal;
+
+    if (value >= 0.0f)
+    {
+        scaled = (int16_t)(value * 10.0f + 0.5f);
+    }
+    else
+    {
+        scaled = (int16_t)(value * 10.0f - 0.5f);
+    }
+
+    integer = scaled / 10;
+    decimal = scaled % 10;
+    if (decimal < 0)
+    {
+        decimal = -decimal;
+    }
+
+    snprintf(buf, size, "%s%d.%d%s", label, integer, decimal, unit);
 }

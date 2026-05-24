@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "app_data.h"
 #include "app_key.h"
 #include "app_ui.h"
 /* USER CODE END Includes */
@@ -117,6 +118,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   printf("System Start\r\n");
   I2C_Scan();
+  AppData_Init();
   AppKey_Init();
   AppUI_Init();
   AppUI_ShowPage(page);
