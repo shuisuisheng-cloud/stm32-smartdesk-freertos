@@ -1,5 +1,6 @@
 #include "app_ui.h"
 
+#include "app_clock.h"
 #include "app_data.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
@@ -113,14 +114,22 @@ static void AppUI_DrawWeather(void)
 
 static void AppUI_DrawAlarm(void)
 {
+    AppClock_Time_t time = AppClock_GetTime();
+    char line[24];
+
     AppUI_Clear();
     ssd1306_WriteString("Alarm", Font_7x10, White);
+
     ssd1306_SetCursor(0, 16);
-    ssd1306_WriteString("Time: 07:30", Font_7x10, White);
+    snprintf(line, sizeof(line), "Time:%02u:%02u:%02u", time.hour, time.minute, time.second);
+    ssd1306_WriteString(line, Font_7x10, White);
+
     ssd1306_SetCursor(0, 32);
-    ssd1306_WriteString("Status: ON", Font_7x10, White);
+    ssd1306_WriteString("Alarm:00:01", Font_7x10, White);
+
     ssd1306_SetCursor(0, 48);
-    ssd1306_WriteString("Repeat: Daily", Font_7x10, White);
+    snprintf(line, sizeof(line), "Status:%s", AppClock_IsAlarmTriggered() ? "ON" : "OFF");
+    ssd1306_WriteString(line, Font_7x10, White);
 }
 
 static void AppUI_DrawDevice(void)

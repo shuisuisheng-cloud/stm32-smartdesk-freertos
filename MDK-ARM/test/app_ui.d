@@ -1,8 +1,9 @@
 test\app_ui.o: ..\User\App\app_ui.c
 test\app_ui.o: ..\User\App\app_ui.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdint.h
+test\app_ui.o: ..\User\App\app_clock.h
 test\app_ui.o: ..\User\App\app_data.h
-test\app_ui.o: ..\User\OLED\ssd1306.h
+test\app_ui.o: ../User/OLED/ssd1306.h
 test\app_ui.o: ../Core/Inc/main.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h
 test\app_ui.o: ../Core/Inc/stm32f4xx_hal_conf.h
@@ -26,6 +27,9 @@ test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h
+test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h
+test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h
@@ -34,7 +38,7 @@ test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-test\app_ui.o: ..\User\OLED\ssd1306_conf.h
-test\app_ui.o: ..\User\OLED\ssd1306_fonts.h
+test\app_ui.o: ../User/OLED/ssd1306_conf.h
+test\app_ui.o: ../User/OLED/ssd1306_fonts.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdbool.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdio.h
