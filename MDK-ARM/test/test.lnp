@@ -4,6 +4,7 @@
 "test\app_key.o"
 "test\app_data.o"
 "test\app_clock.o"
+"test\app_sensor.o"
 "test\main.o"
 "test\stm32f4xx_it.o"
 "test\stm32f4xx_hal_msp.o"

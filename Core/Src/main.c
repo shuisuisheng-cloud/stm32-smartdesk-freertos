@@ -25,6 +25,7 @@
 #include "app_clock.h"
 #include "app_data.h"
 #include "app_key.h"
+#include "app_sensor.h"
 #include "app_ui.h"
 /* USER CODE END Includes */
 
@@ -53,6 +54,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 uint8_t page = 0;
 uint32_t alarm_page_refresh_tick = 0;
+uint32_t sensor_update_tick = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,6 +129,7 @@ int main(void)
   AppData_Init();
   AppClock_Init();
   AppKey_Init();
+  AppSensor_Init();
   AppUI_Init();
   AppUI_ShowPage(page);
   /* USER CODE END 2 */
@@ -139,6 +142,17 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     AppClock_Update();
+
+    if((HAL_GetTick() - sensor_update_tick) >= 500U)
+    {
+        sensor_update_tick = HAL_GetTick();
+        AppSensor_UpdateData();
+
+        if(page == 1U)
+        {
+            AppUI_ShowPage(page);
+        }
+    }
 
     if(AppKey_Scan() == 1U)
     {

@@ -120,7 +120,44 @@ I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h)(0x69D12D25)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h)(0x69D12D25)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x69D12D25)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x69D12D25)
-F (../Core/Src/main.c)(0x6A131D15)(--c99 -c --cpu Cortex-M4.fp.sp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../User/OLED -I ../User/App-I.\RTE\_test-IF:\qianrushi\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IF:\qianrushi\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F411xE -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F411xE-o test\main.o --omf_browse test\main.crf --depend test\main.d)
+F (..\User\App\app_sensor.c)(0x6A131F7F)(--c99 -c --cpu Cortex-M4.fp.sp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../User/OLED -I ../User/App-I.\RTE\_test-IF:\qianrushi\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IF:\qianrushi\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F411xE -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F411xE-o test\app_sensor.o --omf_browse test\app_sensor.crf --depend test\app_sensor.d)
+I (..\User\App\app_sensor.h)(0x6A131F7F)
+I (F:\qianrushi\ARM\ARMCC\include\stdint.h)(0x6025237E)
+I (..\User\App\app_data.h)(0x6A131656)
+I (../Core/Inc/main.h)(0x69FDF557)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x69D12D25)
+I (../Core/Inc/stm32f4xx_hal_conf.h)(0x6A131AE4)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h)(0x69D12D25)
+I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h)(0x69D12D25)
+I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f411xe.h)(0x69D12D25)
+I (../Drivers/CMSIS/Include/core_cm4.h)(0x69D12D25)
+I (../Drivers/CMSIS/Include/cmsis_version.h)(0x69D12D25)
+I (../Drivers/CMSIS/Include/cmsis_compiler.h)(0x69D12D25)
+I (../Drivers/CMSIS/Include/cmsis_armcc.h)(0x69D12D25)
+I (../Drivers/CMSIS/Include/mpu_armv7.h)(0x69D12D25)
+I (../Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h)(0x69D12D25)
+I (F:\qianrushi\ARM\ARMCC\include\stddef.h)(0x6025237E)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h)(0x69D12D25)
+I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h)(0x69D12D25)
+F (../Core/Src/main.c)(0x6A131F91)(--c99 -c --cpu Cortex-M4.fp.sp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../User/OLED -I ../User/App-I.\RTE\_test-IF:\qianrushi\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IF:\qianrushi\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F411xE -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F411xE-o test\main.o --omf_browse test\main.crf --depend test\main.d)
 I (../Core/Inc/main.h)(0x69FDF557)
 I (../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h)(0x69D12D25)
 I (../Core/Inc/stm32f4xx_hal_conf.h)(0x6A131AE4)
@@ -159,6 +196,7 @@ I (F:\qianrushi\ARM\ARMCC\include\stdio.h)(0x60252374)
 I (../User/App/app_clock.h)(0x6A131CEF)
 I (../User/App/app_data.h)(0x6A131656)
 I (../User/App/app_key.h)(0x6A1314D5)
+I (../User/App/app_sensor.h)(0x6A131F7F)
 I (../User/App/app_ui.h)(0x6A130D89)
 F (../Core/Src/stm32f4xx_it.c)(0x69FDF557)(--c99 -c --cpu Cortex-M4.fp.sp -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc -I ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I ../Drivers/CMSIS/Include -I ../User/OLED -I ../User/App-I.\RTE\_test-IF:\qianrushi\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IF:\qianrushi\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include-D__UVISION_VERSION="536" -D_RTE_ -DSTM32F411xE -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F411xE-o test\stm32f4xx_it.o --omf_browse test\stm32f4xx_it.crf --depend test\stm32f4xx_it.d)
 I (../Core/Inc/main.h)(0x69FDF557)
