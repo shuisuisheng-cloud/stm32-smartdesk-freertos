@@ -17,6 +17,7 @@ static void AppUI_DrawDevice(void);
 static void AppUI_Clear(void);
 static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, float value, const char *unit);
 static const char *AppUI_ModeToString(uint8_t mode);
+static const char *AppUI_LightLevelShort(uint16_t light_adc);
 
 void AppUI_Init(void)
 {
@@ -81,18 +82,18 @@ static void AppUI_DrawEnvironment(void)
     ssd1306_WriteString("Env", Font_7x10, White);
 
     ssd1306_SetCursor(0, 12);
-    AppUI_FormatFloat1(line, sizeof(line), "T:", data->temperature, "C");
+    AppUI_FormatFloat1(line, sizeof(line), "T:", data->temperature, "");
     ssd1306_WriteString(line, Font_7x10, White);
     ssd1306_SetCursor(64, 12);
     snprintf(line, sizeof(line), "H:%u%%", (uint16_t)(data->humidity + 0.5f));
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 24);
-    snprintf(line, sizeof(line), "Gas:%u", data->gas_adc);
+    snprintf(line, sizeof(line), "G:%u %s", data->gas_adc, AppData_GetGasLevel(data->gas_adc));
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 36);
-    snprintf(line, sizeof(line), "Light:%u", data->light_adc);
+    snprintf(line, sizeof(line), "L:%u %s", data->light_adc, AppUI_LightLevelShort(data->light_adc));
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 48);
@@ -201,4 +202,21 @@ static const char *AppUI_ModeToString(uint8_t mode)
         default:
             return "Unknown";
     }
+}
+
+static const char *AppUI_LightLevelShort(uint16_t light_adc)
+{
+    const char *level = AppData_GetLightLevel(light_adc);
+
+    if (level[0] == 'N')
+    {
+        return "Nor";
+    }
+
+    if (level[0] == 'B')
+    {
+        return "Bri";
+    }
+
+    return "Dark";
 }

@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "app_actuator.h"
 #include "app_clock.h"
 #include "app_data.h"
 #include "app_key.h"
@@ -55,6 +56,7 @@ UART_HandleTypeDef huart2;
 uint8_t page = 0;
 uint32_t alarm_page_refresh_tick = 0;
 uint32_t sensor_update_tick = 0;
+uint32_t gas_fake_update_tick = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,6 +129,7 @@ int main(void)
   printf("System Start\r\n");
   I2C_Scan();
   AppData_Init();
+  AppActuator_Init();
   AppClock_Init();
   AppKey_Init();
   AppSensor_Init();
@@ -142,6 +145,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     AppClock_Update();
+    AppActuator_Update();
 
     if((HAL_GetTick() - sensor_update_tick) >= 500U)
     {
@@ -149,6 +153,17 @@ int main(void)
         AppSensor_UpdateData();
 
         if(page == 1U)
+        {
+            AppUI_ShowPage(page);
+        }
+    }
+
+    if((HAL_GetTick() - gas_fake_update_tick) >= 3000U)
+    {
+        gas_fake_update_tick = HAL_GetTick();
+        AppData_UpdateFake();
+
+        if((page == 1U) || (page == 4U))
         {
             AppUI_ShowPage(page);
         }

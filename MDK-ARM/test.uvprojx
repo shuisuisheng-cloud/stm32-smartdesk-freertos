@@ -413,6 +413,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\App\app_sensor.c</FilePath>
             </File>
+            <File>
+              <FileName>app_actuator.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\App\app_actuator.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
