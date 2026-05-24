@@ -1,6 +1,7 @@
 --cpu=Cortex-M4.fp.sp
 "test\startup_stm32f411xe.o"
 "test\app_ui.o"
+"test\app_key.o"
 "test\main.o"
 "test\stm32f4xx_it.o"
 "test\stm32f4xx_hal_msp.o"

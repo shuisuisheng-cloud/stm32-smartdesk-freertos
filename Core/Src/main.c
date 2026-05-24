@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "app_key.h"
 #include "app_ui.h"
 /* USER CODE END Includes */
 
@@ -116,23 +117,27 @@ int main(void)
   /* USER CODE BEGIN 2 */
   printf("System Start\r\n");
   I2C_Scan();
+  AppKey_Init();
   AppUI_Init();
+  AppUI_ShowPage(page);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    AppUI_ShowPage(page);
-
-    page++;
-    if(page > 4)
+    if(AppKey_Scan() == 1U)
     {
-        page = 0;
+        page++;
+        if(page > 4)
+        {
+            page = 0;
+        }
+
+        AppUI_ShowPage(page);
     }
 
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-    HAL_Delay(3000);
+    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
