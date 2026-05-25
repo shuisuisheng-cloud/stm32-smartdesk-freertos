@@ -16,6 +16,7 @@ typedef struct
     uint8_t comfort_score;
     uint8_t esp_ok;
     uint8_t wifi_ok;
+    uint8_t time_synced;
 } SmartDesk_Data_t;
 
 void AppData_Init(void);

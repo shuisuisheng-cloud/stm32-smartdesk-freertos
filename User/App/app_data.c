@@ -14,6 +14,7 @@ void AppData_Init(void)
     smartdesk_data.mode = 0U;
     smartdesk_data.esp_ok = 0U;
     smartdesk_data.wifi_ok = 0U;
+    smartdesk_data.time_synced = 0U;
     fake_gas_index = 0U;
     AppData_UpdateFake();
 }

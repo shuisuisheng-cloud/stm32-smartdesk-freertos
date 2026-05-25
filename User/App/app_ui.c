@@ -122,6 +122,7 @@ static void AppUI_DrawWeather(void)
 static void AppUI_DrawAlarm(void)
 {
     AppClock_Time_t time = AppClock_GetTime();
+    SmartDesk_Data_t *data = AppData_Get();
     char line[24];
 
     AppUI_Clear();
@@ -132,7 +133,8 @@ static void AppUI_DrawAlarm(void)
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 32);
-    ssd1306_WriteString("Alarm:00:01", Font_7x10, White);
+    snprintf(line, sizeof(line), "Sync:%s", data->time_synced ? "OK" : "FAIL");
+    ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 48);
     snprintf(line, sizeof(line), "Status:%s", AppClock_IsAlarmTriggered() ? "ON" : "OFF");

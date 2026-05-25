@@ -60,6 +60,7 @@ uint32_t alarm_page_refresh_tick = 0;
 uint32_t sensor_update_tick = 0;
 uint32_t gas_fake_update_tick = 0;
 uint8_t key_event = 0;
+char sntp_time_buf[96];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -134,18 +135,51 @@ int main(void)
   printf("System Start\r\n");
   I2C_Scan();
   AppData_Init();
+  AppClock_Init();
   AppESP8266_Init();
   AppData_Get()->esp_ok = AppESP8266_TestAT();
   AppData_Get()->wifi_ok = 0U;
+  AppData_Get()->time_synced = 0U;
   if(AppData_Get()->esp_ok != 0U)
   {
       if(AppESP8266_SetStationMode() != 0U)
       {
           AppData_Get()->wifi_ok = AppESP8266_ConnectWiFi(0, 0);
+          if(AppData_Get()->wifi_ok != 0U)
+          {
+              if(AppESP8266_PingTest() != 0U)
+              {
+                  if(AppESP8266_ConfigSNTP() != 0U)
+                  {
+                      if(AppESP8266_GetSNTPTime(sntp_time_buf, sizeof(sntp_time_buf)) != 0U)
+                      {
+                          if(AppClock_SetTimeFromSNTPString(sntp_time_buf) != 0U)
+                          {
+                              AppData_Get()->time_synced = 1U;
+                          }
+                          else
+                          {
+                              AppData_Get()->time_synced = 0U;
+                          }
+                      }
+                      else
+                      {
+                          AppData_Get()->time_synced = 0U;
+                      }
+                  }
+                  else
+                  {
+                      AppData_Get()->time_synced = 0U;
+                  }
+              }
+              else
+              {
+                  AppData_Get()->time_synced = 0U;
+              }
+          }
       }
   }
   AppActuator_Init();
-  AppClock_Init();
   AppKey_Init();
   AppSensor_Init();
   AppUI_Init();

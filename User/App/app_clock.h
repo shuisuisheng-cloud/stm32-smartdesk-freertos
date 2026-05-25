@@ -16,5 +16,7 @@ AppClock_Time_t AppClock_GetTime(void);
 void AppClock_SetAlarm(uint8_t hour, uint8_t minute);
 uint8_t AppClock_IsAlarmTriggered(void);
 void AppClock_ClearAlarm(void);
+uint8_t AppClock_SetTimeFromSNTPString(const char *sntp_str);
+uint8_t AppClock_IsTimeSynced(void);
 
 #endif /* __APP_CLOCK_H__ */
