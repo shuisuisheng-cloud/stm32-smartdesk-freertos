@@ -57,6 +57,7 @@ uint8_t page = 0;
 uint32_t alarm_page_refresh_tick = 0;
 uint32_t sensor_update_tick = 0;
 uint32_t gas_fake_update_tick = 0;
+uint8_t key_event = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -168,8 +169,8 @@ int main(void)
             AppUI_ShowPage(page);
         }
     }
-
-    if(AppKey_Scan() == 1U)
+    key_event = AppKey_Scan();
+    if(key_event == APP_KEY_EVENT_SHORT)
     {
         page++;
         if(page > 4)
@@ -177,6 +178,11 @@ int main(void)
             page = 0;
         }
 
+        AppUI_ShowPage(page);
+    }
+    else if(key_event == APP_KEY_EVENT_LONG)
+    {
+        AppData_NextMode();
         AppUI_ShowPage(page);
     }
 

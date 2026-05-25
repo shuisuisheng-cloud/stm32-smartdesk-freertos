@@ -16,7 +16,6 @@ static void AppUI_DrawAlarm(void);
 static void AppUI_DrawDevice(void);
 static void AppUI_Clear(void);
 static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, float value, const char *unit);
-static const char *AppUI_ModeToString(uint8_t mode);
 static const char *AppUI_LightLevelShort(uint16_t light_adc);
 
 void AppUI_Init(void)
@@ -154,7 +153,7 @@ static void AppUI_DrawDevice(void)
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 48);
-    snprintf(line, sizeof(line), "Mode:%s", AppUI_ModeToString(data->mode));
+    snprintf(line, sizeof(line), "Mode:%s", AppData_GetModeName(data->mode));
     ssd1306_WriteString(line, Font_7x10, White);
 }
 
@@ -181,27 +180,6 @@ static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, floa
     }
 
     snprintf(buf, size, "%s%d.%d%s", label, integer, decimal, unit);
-}
-
-static const char *AppUI_ModeToString(uint8_t mode)
-{
-    switch (mode)
-    {
-        case 0:
-            return "Auto";
-
-        case 1:
-            return "Sleep";
-
-        case 2:
-            return "Study";
-
-        case 3:
-            return "Away";
-
-        default:
-            return "Unknown";
-    }
 }
 
 static const char *AppUI_LightLevelShort(uint16_t light_adc)

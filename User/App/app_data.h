@@ -19,8 +19,10 @@ typedef struct
 void AppData_Init(void);
 SmartDesk_Data_t* AppData_Get(void);
 void AppData_UpdateFake(void);
+void AppData_NextMode(void);
 uint8_t AppData_CalcComfortScore(SmartDesk_Data_t *data);
 const char* AppData_GetLightLevel(uint16_t light_adc);
 const char* AppData_GetGasLevel(uint16_t gas_adc);
+const char* AppData_GetModeName(uint8_t mode);
 
 #endif /* __APP_DATA_H__ */

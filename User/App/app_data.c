@@ -44,6 +44,17 @@ void AppData_UpdateFake(void)
     smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
 }
 
+void AppData_NextMode(void)
+{
+    smartdesk_data.mode++;
+    if (smartdesk_data.mode > 3U)
+    {
+        smartdesk_data.mode = 0U;
+    }
+
+    smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
+}
+
 const char* AppData_GetLightLevel(uint16_t light_adc)
 {
     if (light_adc < 1800U)
@@ -74,15 +85,62 @@ const char* AppData_GetGasLevel(uint16_t gas_adc)
     return "Danger";
 }
 
+const char* AppData_GetModeName(uint8_t mode)
+{
+    switch (mode)
+    {
+        case 0:
+            return "Auto";
+
+        case 1:
+            return "Study";
+
+        case 2:
+            return "Sleep";
+
+        case 3:
+            return "Away";
+
+        default:
+            return "Unknown";
+    }
+}
+
 uint8_t AppData_CalcComfortScore(SmartDesk_Data_t *data)
 {
     int16_t score = 100;
     const char *light_level;
     const char *gas_level;
+    uint8_t gas_warning_penalty = 20U;
+    uint8_t gas_danger_penalty = 40U;
+    uint8_t light_dark_penalty = 10U;
+    uint8_t light_bright_penalty = 5U;
 
     if (data == 0)
     {
         return 0U;
+    }
+
+    switch (data->mode)
+    {
+        case 1:
+            gas_warning_penalty = 30U;
+            gas_danger_penalty = 55U;
+            light_dark_penalty = 15U;
+            light_bright_penalty = 10U;
+            break;
+
+        case 2:
+            light_bright_penalty = 20U;
+            break;
+
+        case 3:
+            gas_danger_penalty = 60U;
+            break;
+
+        case 0:
+        default:
+            break;
     }
 
     if (data->temperature < 22.0f)
@@ -106,21 +164,21 @@ uint8_t AppData_CalcComfortScore(SmartDesk_Data_t *data)
     gas_level = AppData_GetGasLevel(data->gas_adc);
     if (gas_level[0] == 'W')
     {
-        score -= 20;
+        score -= gas_warning_penalty;
     }
     else if (gas_level[0] == 'D')
     {
-        score -= 40;
+        score -= gas_danger_penalty;
     }
 
     light_level = AppData_GetLightLevel(data->light_adc);
     if (light_level[0] == 'D')
     {
-        score -= 10;
+        score -= light_dark_penalty;
     }
     else if (light_level[0] == 'B')
     {
-        score -= 5;
+        score -= light_bright_penalty;
     }
 
     if (score < 0)
