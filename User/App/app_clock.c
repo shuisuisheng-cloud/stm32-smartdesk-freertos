@@ -3,25 +3,42 @@
 #include "app_data.h"
 #include "main.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define APP_CLOCK_DAY_SECONDS 86400UL
 
 static uint32_t clock_base_tick = 0U;
 static uint32_t clock_base_seconds = 0U;
-static AppClock_Time_t current_time;
+static uint16_t clock_base_year = 2000U;
+static uint8_t clock_base_month = 1U;
+static uint8_t clock_base_day = 1U;
+static uint8_t clock_base_weekday = 6U;
+static AppClock_DateTime_t current_time;
 static uint8_t alarm_hour = 0U;
 static uint8_t alarm_minute = 1U;
 static uint8_t alarm_triggered = 0U;
 static uint8_t time_synced = 0U;
 
-static AppClock_Time_t AppClock_SecondsToTime(uint32_t seconds);
-static uint8_t AppClock_ParseTimeField(const char *s, uint8_t *hour, uint8_t *minute, uint8_t *second);
+static AppClock_DateTime_t AppClock_MakeDateTime(uint32_t day_offset, uint32_t seconds);
+static uint8_t AppClock_ParseSNTP(const char *s, AppClock_DateTime_t *date_time);
+static uint8_t AppClock_MonthFromName(const char *name);
+static uint8_t AppClock_WeekdayFromName(const char *name);
+static uint8_t AppClock_DaysInMonth(uint16_t year, uint8_t month);
+static uint8_t AppClock_IsLeapYear(uint16_t year);
 
 void AppClock_Init(void)
 {
     clock_base_tick = HAL_GetTick();
     clock_base_seconds = 0U;
+    clock_base_year = 2000U;
+    clock_base_month = 1U;
+    clock_base_day = 1U;
+    clock_base_weekday = 6U;
+    current_time.year = clock_base_year;
+    current_time.month = clock_base_month;
+    current_time.day = clock_base_day;
+    current_time.weekday = clock_base_weekday;
     current_time.hour = 0U;
     current_time.minute = 0U;
     current_time.second = 0U;
@@ -33,10 +50,12 @@ void AppClock_Init(void)
 
 void AppClock_Update(void)
 {
-    uint32_t elapsed_seconds = (clock_base_seconds + ((HAL_GetTick() - clock_base_tick) / 1000U)) % APP_CLOCK_DAY_SECONDS;
+    uint32_t total_seconds = clock_base_seconds + ((HAL_GetTick() - clock_base_tick) / 1000U);
+    uint32_t day_offset = total_seconds / APP_CLOCK_DAY_SECONDS;
+    uint32_t elapsed_seconds = total_seconds % APP_CLOCK_DAY_SECONDS;
     uint32_t alarm_seconds = ((uint32_t)alarm_hour * 3600U) + ((uint32_t)alarm_minute * 60U);
 
-    current_time = AppClock_SecondsToTime(elapsed_seconds);
+    current_time = AppClock_MakeDateTime(day_offset, elapsed_seconds);
 
     if ((alarm_triggered == 0U) && (elapsed_seconds >= alarm_seconds))
     {
@@ -50,6 +69,11 @@ void AppClock_Update(void)
 }
 
 AppClock_Time_t AppClock_GetTime(void)
+{
+    return current_time;
+}
+
+AppClock_DateTime_t AppClock_GetDateTime(void)
 {
     return current_time;
 }
@@ -74,9 +98,7 @@ void AppClock_ClearAlarm(void)
 uint8_t AppClock_SetTimeFromSNTPString(const char *sntp_str)
 {
     const char *payload;
-    uint8_t hour;
-    uint8_t minute;
-    uint8_t second;
+    AppClock_DateTime_t date_time;
 
     if (sntp_str == 0)
     {
@@ -91,24 +113,24 @@ uint8_t AppClock_SetTimeFromSNTPString(const char *sntp_str)
         return 0U;
     }
 
-    if ((strstr(payload, "1970") != 0) ||
-        (strstr(payload, "Jan 1") != 0) ||
-        (strstr(payload, "Jan 01") != 0))
+    if (strstr(payload, "1970") != 0)
     {
         time_synced = 0U;
         return 0U;
     }
 
-    if (AppClock_ParseTimeField(payload, &hour, &minute, &second) == 0U)
+    if (AppClock_ParseSNTP(payload, &date_time) == 0U)
     {
         time_synced = 0U;
         return 0U;
     }
 
-    current_time.hour = hour;
-    current_time.minute = minute;
-    current_time.second = second;
-    clock_base_seconds = ((uint32_t)hour * 3600U) + ((uint32_t)minute * 60U) + second;
+    current_time = date_time;
+    clock_base_year = date_time.year;
+    clock_base_month = date_time.month;
+    clock_base_day = date_time.day;
+    clock_base_weekday = date_time.weekday;
+    clock_base_seconds = ((uint32_t)date_time.hour * 3600U) + ((uint32_t)date_time.minute * 60U) + date_time.second;
     clock_base_tick = HAL_GetTick();
     time_synced = 1U;
 
@@ -120,45 +142,171 @@ uint8_t AppClock_IsTimeSynced(void)
     return time_synced;
 }
 
-static AppClock_Time_t AppClock_SecondsToTime(uint32_t seconds)
+const char* AppClock_GetWeekdayName(uint8_t weekday)
 {
-    AppClock_Time_t time;
+    static const char *names[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
-    time.hour = (uint8_t)(seconds / 3600U);
-    seconds %= 3600U;
-    time.minute = (uint8_t)(seconds / 60U);
-    time.second = (uint8_t)(seconds % 60U);
+    if (weekday < 7U)
+    {
+        return names[weekday];
+    }
 
-    return time;
+    return "Unk";
 }
 
-static uint8_t AppClock_ParseTimeField(const char *s, uint8_t *hour, uint8_t *minute, uint8_t *second)
+static AppClock_DateTime_t AppClock_MakeDateTime(uint32_t day_offset, uint32_t seconds)
 {
-    const char *p = s;
+    AppClock_DateTime_t date_time;
+    uint32_t i;
 
-    while (*p != '\0')
+    date_time.year = clock_base_year;
+    date_time.month = clock_base_month;
+    date_time.day = clock_base_day;
+    date_time.weekday = (uint8_t)((clock_base_weekday + day_offset) % 7U);
+
+    for (i = 0U; i < day_offset; i++)
     {
-        if ((p[0] >= '0') && (p[0] <= '2') &&
-            (p[1] >= '0') && (p[1] <= '9') &&
-            (p[2] == ':') &&
-            (p[3] >= '0') && (p[3] <= '5') &&
-            (p[4] >= '0') && (p[4] <= '9') &&
-            (p[5] == ':') &&
-            (p[6] >= '0') && (p[6] <= '5') &&
-            (p[7] >= '0') && (p[7] <= '9'))
+        date_time.day++;
+        if (date_time.day > AppClock_DaysInMonth(date_time.year, date_time.month))
         {
-            *hour = (uint8_t)(((p[0] - '0') * 10) + (p[1] - '0'));
-            *minute = (uint8_t)(((p[3] - '0') * 10) + (p[4] - '0'));
-            *second = (uint8_t)(((p[6] - '0') * 10) + (p[7] - '0'));
-
-            if (*hour < 24U)
+            date_time.day = 1U;
+            date_time.month++;
+            if (date_time.month > 12U)
             {
-                return 1U;
+                date_time.month = 1U;
+                date_time.year++;
             }
         }
+    }
 
-        p++;
+    date_time.hour = (uint8_t)(seconds / 3600U);
+    seconds %= 3600U;
+    date_time.minute = (uint8_t)(seconds / 60U);
+    date_time.second = (uint8_t)(seconds % 60U);
+
+    return date_time;
+}
+
+static uint8_t AppClock_ParseSNTP(const char *s, AppClock_DateTime_t *date_time)
+{
+    char weekday_name[4];
+    char month_name[4];
+    unsigned int day;
+    unsigned int hour;
+    unsigned int minute;
+    unsigned int second;
+    unsigned int year;
+    uint8_t month;
+    uint8_t weekday;
+
+    if ((s == 0) || (date_time == 0))
+    {
+        return 0U;
+    }
+
+    if (sscanf(s, "+CIPSNTPTIME:%3s %3s %u %u:%u:%u %u",
+               weekday_name,
+               month_name,
+               &day,
+               &hour,
+               &minute,
+               &second,
+               &year) != 7)
+    {
+        return 0U;
+    }
+
+    weekday_name[3] = '\0';
+    month_name[3] = '\0';
+    weekday = AppClock_WeekdayFromName(weekday_name);
+    month = AppClock_MonthFromName(month_name);
+
+    if ((year == 1970U) ||
+        (year < 2000U) ||
+        (month == 0U) ||
+        (weekday > 6U) ||
+        (day == 0U) ||
+        (day > AppClock_DaysInMonth((uint16_t)year, month)) ||
+        (hour >= 24U) ||
+        (minute >= 60U) ||
+        (second >= 60U))
+    {
+        return 0U;
+    }
+
+    date_time->year = (uint16_t)year;
+    date_time->month = month;
+    date_time->day = (uint8_t)day;
+    date_time->weekday = weekday;
+    date_time->hour = (uint8_t)hour;
+    date_time->minute = (uint8_t)minute;
+    date_time->second = (uint8_t)second;
+
+    return 1U;
+}
+
+static uint8_t AppClock_MonthFromName(const char *name)
+{
+    static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    uint8_t i;
+
+    for (i = 0U; i < 12U; i++)
+    {
+        if (strncmp(name, months[i], 3U) == 0)
+        {
+            return (uint8_t)(i + 1U);
+        }
     }
 
     return 0U;
+}
+
+static uint8_t AppClock_WeekdayFromName(const char *name)
+{
+    static const char *weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    uint8_t i;
+
+    for (i = 0U; i < 7U; i++)
+    {
+        if (strncmp(name, weekdays[i], 3U) == 0)
+        {
+            return i;
+        }
+    }
+
+    return 0xFFU;
+}
+
+static uint8_t AppClock_DaysInMonth(uint16_t year, uint8_t month)
+{
+    static const uint8_t days[] = {31U, 28U, 31U, 30U, 31U, 30U,
+                                   31U, 31U, 30U, 31U, 30U, 31U};
+
+    if ((month == 0U) || (month > 12U))
+    {
+        return 31U;
+    }
+
+    if ((month == 2U) && (AppClock_IsLeapYear(year) != 0U))
+    {
+        return 29U;
+    }
+
+    return days[month - 1U];
+}
+
+static uint8_t AppClock_IsLeapYear(uint16_t year)
+{
+    if ((year % 400U) == 0U)
+    {
+        return 1U;
+    }
+
+    if ((year % 100U) == 0U)
+    {
+        return 0U;
+    }
+
+    return ((year % 4U) == 0U) ? 1U : 0U;
 }

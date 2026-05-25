@@ -171,8 +171,6 @@ uint8_t AppESP8266_GetSNTPTime(char *out, uint16_t out_len)
 
             if ((found_time != 0U) &&
                 (strstr(out, "1970") == 0) &&
-                (strstr(out, "Jan 1") == 0) &&
-                (strstr(out, "Jan 01") == 0) &&
                 (strstr(out, " 20") != 0))
             {
                 return 1U;

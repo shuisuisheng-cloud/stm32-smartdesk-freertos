@@ -36,4 +36,5 @@ test\app_clock.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_i2c_ex.h
 test\app_clock.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h
 test\app_clock.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h
 test\app_clock.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+test\app_clock.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdio.h
 test\app_clock.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\string.h

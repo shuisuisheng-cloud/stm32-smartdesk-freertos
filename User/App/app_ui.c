@@ -121,23 +121,31 @@ static void AppUI_DrawWeather(void)
 
 static void AppUI_DrawAlarm(void)
 {
-    AppClock_Time_t time = AppClock_GetTime();
+    AppClock_DateTime_t date_time = AppClock_GetDateTime();
     SmartDesk_Data_t *data = AppData_Get();
     char line[24];
 
     AppUI_Clear();
     ssd1306_WriteString("Alarm", Font_7x10, White);
 
-    ssd1306_SetCursor(0, 16);
-    snprintf(line, sizeof(line), "Time:%02u:%02u:%02u", time.hour, time.minute, time.second);
+    ssd1306_SetCursor(0, 12);
+    snprintf(line, sizeof(line), "%02u-%02u-%02u %s",
+             (uint8_t)(date_time.year % 100U),
+             date_time.month,
+             date_time.day,
+             AppClock_GetWeekdayName(date_time.weekday));
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 32);
+    ssd1306_SetCursor(0, 24);
+    snprintf(line, sizeof(line), "T:%02u:%02u:%02u", date_time.hour, date_time.minute, date_time.second);
+    ssd1306_WriteString(line, Font_7x10, White);
+
+    ssd1306_SetCursor(0, 36);
     snprintf(line, sizeof(line), "Sync:%s", data->time_synced ? "OK" : "FAIL");
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 48);
-    snprintf(line, sizeof(line), "Status:%s", AppClock_IsAlarmTriggered() ? "ON" : "OFF");
+    snprintf(line, sizeof(line), "Stat:%s", AppClock_IsAlarmTriggered() ? "ON" : "OFF");
     ssd1306_WriteString(line, Font_7x10, White);
 }
 
