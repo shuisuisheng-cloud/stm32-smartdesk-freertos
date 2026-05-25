@@ -12,6 +12,7 @@ void AppData_Init(void)
     smartdesk_data.light_on = 0U;
     smartdesk_data.alarm_on = 0U;
     smartdesk_data.mode = 0U;
+    smartdesk_data.esp_ok = 0U;
     fake_gas_index = 0U;
     AppData_UpdateFake();
 }

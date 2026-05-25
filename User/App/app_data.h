@@ -14,6 +14,7 @@ typedef struct
     uint8_t alarm_on;
     uint8_t mode;
     uint8_t comfort_score;
+    uint8_t esp_ok;
 } SmartDesk_Data_t;
 
 void AppData_Init(void);

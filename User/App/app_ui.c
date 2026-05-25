@@ -62,6 +62,9 @@ static void AppUI_Clear(void)
 
 static void AppUI_DrawHome(void)
 {
+    SmartDesk_Data_t *data = AppData_Get();
+    char line[24];
+
     AppUI_Clear();
     ssd1306_WriteString("Home", Font_7x10, White);
     ssd1306_SetCursor(0, 16);
@@ -69,7 +72,8 @@ static void AppUI_DrawHome(void)
     ssd1306_SetCursor(0, 32);
     ssd1306_WriteString("System Ready", Font_7x10, White);
     ssd1306_SetCursor(0, 48);
-    ssd1306_WriteString("Mode: Auto", Font_7x10, White);
+    snprintf(line, sizeof(line), "Mode:%s", AppData_GetModeName(data->mode));
+    ssd1306_WriteString(line, Font_7x10, White);
 }
 
 static void AppUI_DrawEnvironment(void)
@@ -102,6 +106,9 @@ static void AppUI_DrawEnvironment(void)
 
 static void AppUI_DrawWeather(void)
 {
+    SmartDesk_Data_t *data = AppData_Get();
+    char line[24];
+
     AppUI_Clear();
     ssd1306_WriteString("Weather", Font_7x10, White);
     ssd1306_SetCursor(0, 16);
@@ -109,7 +116,8 @@ static void AppUI_DrawWeather(void)
     ssd1306_SetCursor(0, 32);
     ssd1306_WriteString("Sunny 28C", Font_7x10, White);
     ssd1306_SetCursor(0, 48);
-    ssd1306_WriteString("Wind: Low", Font_7x10, White);
+    snprintf(line, sizeof(line), "ESP:%s", data->esp_ok ? "OK" : "FAIL");
+    ssd1306_WriteString(line, Font_7x10, White);
 }
 
 static void AppUI_DrawAlarm(void)

@@ -38,6 +38,7 @@ test\main.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdio.h
 test\main.o: ../User/App/app_actuator.h
 test\main.o: ../User/App/app_clock.h
 test\main.o: ../User/App/app_data.h
+test\main.o: ../User/App/app_esp8266.h
 test\main.o: ../User/App/app_key.h
 test\main.o: ../User/App/app_sensor.h
 test\main.o: ../User/App/app_ui.h
