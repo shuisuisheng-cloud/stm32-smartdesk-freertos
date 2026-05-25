@@ -3,16 +3,65 @@
 #include "main.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #define APP_ESP8266_RX_BUFFER_SIZE 128U
+#define APP_ESP8266_CMD_BUFFER_SIZE 96U
+#define WIFI_SSID "OPPO"
+#define WIFI_PASS "12345678"
 
 extern UART_HandleTypeDef huart1;
 
+static uint8_t esp_wifi_connected = 0U;
+
+static uint8_t AppESP8266_SendATExpect2(const char *cmd, const char *expect1, const char *expect2, uint32_t timeout);
+
 void AppESP8266_Init(void)
 {
+    esp_wifi_connected = 0U;
 }
 
 uint8_t AppESP8266_SendAT(const char *cmd, const char *expect, uint32_t timeout)
+{
+    return AppESP8266_SendATExpect2(cmd, expect, 0, timeout);
+}
+
+uint8_t AppESP8266_TestAT(void)
+{
+    return AppESP8266_SendAT("AT\r\n", "OK", 1000U);
+}
+
+uint8_t AppESP8266_SetStationMode(void)
+{
+    return AppESP8266_SendAT("AT+CWMODE=1\r\n", "OK", 2000U);
+}
+
+uint8_t AppESP8266_ConnectWiFi(const char *ssid, const char *password)
+{
+    char cmd[APP_ESP8266_CMD_BUFFER_SIZE];
+
+    if (ssid == 0)
+    {
+        ssid = WIFI_SSID;
+    }
+
+    if (password == 0)
+    {
+        password = WIFI_PASS;
+    }
+
+    snprintf(cmd, sizeof(cmd), "AT+CWJAP=\"%s\",\"%s\"\r\n", ssid, password);
+    esp_wifi_connected = AppESP8266_SendATExpect2(cmd, "WIFI CONNECTED", "OK", 15000U);
+
+    return esp_wifi_connected;
+}
+
+uint8_t AppESP8266_IsWiFiConnected(void)
+{
+    return esp_wifi_connected;
+}
+
+static uint8_t AppESP8266_SendATExpect2(const char *cmd, const char *expect1, const char *expect2, uint32_t timeout)
 {
     uint8_t ch;
     char rx_buf[APP_ESP8266_RX_BUFFER_SIZE];
@@ -37,7 +86,12 @@ uint8_t AppESP8266_SendAT(const char *cmd, const char *expect, uint32_t timeout)
                 rx_buf[rx_len] = '\0';
             }
 
-            if (strstr(rx_buf, expect) != 0)
+            if ((expect1 != 0) && (strstr(rx_buf, expect1) != 0))
+            {
+                return 1U;
+            }
+
+            if ((expect2 != 0) && (strstr(rx_buf, expect2) != 0))
             {
                 return 1U;
             }
@@ -45,9 +99,4 @@ uint8_t AppESP8266_SendAT(const char *cmd, const char *expect, uint32_t timeout)
     }
 
     return 0U;
-}
-
-uint8_t AppESP8266_TestAT(void)
-{
-    return AppESP8266_SendAT("AT\r\n", "OK", 1000U);
 }

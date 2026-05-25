@@ -112,11 +112,10 @@ static void AppUI_DrawWeather(void)
     AppUI_Clear();
     ssd1306_WriteString("Weather", Font_7x10, White);
     ssd1306_SetCursor(0, 16);
-    ssd1306_WriteString("City: Xian", Font_7x10, White);
-    ssd1306_SetCursor(0, 32);
-    ssd1306_WriteString("Sunny 28C", Font_7x10, White);
-    ssd1306_SetCursor(0, 48);
     snprintf(line, sizeof(line), "ESP:%s", data->esp_ok ? "OK" : "FAIL");
+    ssd1306_WriteString(line, Font_7x10, White);
+    ssd1306_SetCursor(0, 32);
+    snprintf(line, sizeof(line), "WiFi:%s", data->wifi_ok ? "OK" : "FAIL");
     ssd1306_WriteString(line, Font_7x10, White);
 }
 

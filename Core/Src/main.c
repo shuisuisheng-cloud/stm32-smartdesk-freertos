@@ -136,6 +136,14 @@ int main(void)
   AppData_Init();
   AppESP8266_Init();
   AppData_Get()->esp_ok = AppESP8266_TestAT();
+  AppData_Get()->wifi_ok = 0U;
+  if(AppData_Get()->esp_ok != 0U)
+  {
+      if(AppESP8266_SetStationMode() != 0U)
+      {
+          AppData_Get()->wifi_ok = AppESP8266_ConnectWiFi(0, 0);
+      }
+  }
   AppActuator_Init();
   AppClock_Init();
   AppKey_Init();
