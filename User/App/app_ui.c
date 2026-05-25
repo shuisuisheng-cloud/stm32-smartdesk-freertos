@@ -116,13 +116,13 @@ static void AppUI_DrawWeather(void)
     ssd1306_WriteString("Weather", Font_7x10, White);
 
     ssd1306_SetCursor(0, 16);
-    if (weather->valid != 0U)
+    if (weather->updating != 0U)
+    {
+        snprintf(line, sizeof(line), "Updating...");
+    }
+    else if (weather->valid != 0U)
     {
         AppUI_FormatWeatherLine(line, sizeof(line), weather->city, weather->weather);
-    }
-    else if (weather->conn_fail != 0U)
-    {
-        snprintf(line, sizeof(line), "Conn Fail");
     }
     else
     {
@@ -130,16 +130,33 @@ static void AppUI_DrawWeather(void)
     }
     ssd1306_WriteString(line, Font_7x10, White);
 
-    if (weather->valid != 0U)
+    if (weather->updating != 0U)
+    {
+        ssd1306_SetCursor(0, 48);
+        snprintf(line, sizeof(line), "WiFi:%s", data->wifi_ok ? "OK" : "FAIL");
+        ssd1306_WriteString(line, Font_7x10, White);
+    }
+    else if (weather->valid != 0U)
     {
         ssd1306_SetCursor(0, 32);
         snprintf(line, sizeof(line), "T:%dC", weather->temperature);
         ssd1306_WriteString(line, Font_7x10, White);
-    }
 
-    ssd1306_SetCursor(0, 48);
-    snprintf(line, sizeof(line), "WiFi:%s", data->wifi_ok ? "OK" : "FAIL");
-    ssd1306_WriteString(line, Font_7x10, White);
+        ssd1306_SetCursor(0, 48);
+        snprintf(line,
+                 sizeof(line),
+                 "Upd:%02u:%02u %s",
+                 weather->last_update_hour,
+                 weather->last_update_minute,
+                 weather->update_ok ? "OK" : "Old");
+        ssd1306_WriteString(line, Font_7x10, White);
+    }
+    else
+    {
+        ssd1306_SetCursor(0, 48);
+        snprintf(line, sizeof(line), "WiFi:%s", data->wifi_ok ? "OK" : "FAIL");
+        ssd1306_WriteString(line, Font_7x10, White);
+    }
 }
 
 static void AppUI_DrawAlarm(void)

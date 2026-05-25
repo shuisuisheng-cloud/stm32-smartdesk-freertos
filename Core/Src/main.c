@@ -158,7 +158,6 @@ int main(void)
                           if(AppClock_SetTimeFromSNTPString(sntp_time_buf) != 0U)
                           {
                               AppData_Get()->time_synced = 1U;
-                              AppWeather_UpdateFromESP8266();
                           }
                           else
                           {
@@ -198,6 +197,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     AppClock_Update();
     AppActuator_Update();
+    AppWeather_Task();
 
     if((HAL_GetTick() - sensor_update_tick) >= 500U)
     {
