@@ -2,6 +2,7 @@
 
 #include "app_clock.h"
 #include "app_data.h"
+#include "app_weather.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
 
@@ -16,6 +17,7 @@ static void AppUI_DrawAlarm(void);
 static void AppUI_DrawDevice(void);
 static void AppUI_Clear(void);
 static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, float value, const char *unit);
+static void AppUI_FormatWeatherLine(char *buf, uint32_t size, const char *city, const char *weather);
 static const char *AppUI_LightLevelShort(uint16_t light_adc);
 
 void AppUI_Init(void)
@@ -107,14 +109,35 @@ static void AppUI_DrawEnvironment(void)
 static void AppUI_DrawWeather(void)
 {
     SmartDesk_Data_t *data = AppData_Get();
+    AppWeather_Data_t *weather = AppWeather_Get();
     char line[24];
 
     AppUI_Clear();
     ssd1306_WriteString("Weather", Font_7x10, White);
+
     ssd1306_SetCursor(0, 16);
-    snprintf(line, sizeof(line), "ESP:%s", data->esp_ok ? "OK" : "FAIL");
+    if (weather->valid != 0U)
+    {
+        AppUI_FormatWeatherLine(line, sizeof(line), weather->city, weather->weather);
+    }
+    else if (weather->conn_fail != 0U)
+    {
+        snprintf(line, sizeof(line), "Conn Fail");
+    }
+    else
+    {
+        snprintf(line, sizeof(line), "No Data");
+    }
     ssd1306_WriteString(line, Font_7x10, White);
-    ssd1306_SetCursor(0, 32);
+
+    if (weather->valid != 0U)
+    {
+        ssd1306_SetCursor(0, 32);
+        snprintf(line, sizeof(line), "T:%dC", weather->temperature);
+        ssd1306_WriteString(line, Font_7x10, White);
+    }
+
+    ssd1306_SetCursor(0, 48);
     snprintf(line, sizeof(line), "WiFi:%s", data->wifi_ok ? "OK" : "FAIL");
     ssd1306_WriteString(line, Font_7x10, White);
 }
@@ -197,6 +220,16 @@ static void AppUI_FormatFloat1(char *buf, uint32_t size, const char *label, floa
     }
 
     snprintf(buf, size, "%s%d.%d%s", label, integer, decimal, unit);
+}
+
+static void AppUI_FormatWeatherLine(char *buf, uint32_t size, const char *city, const char *weather)
+{
+    char city_part[9];
+    char weather_part[10];
+
+    snprintf(city_part, sizeof(city_part), "%.8s", city);
+    snprintf(weather_part, sizeof(weather_part), "%.9s", weather);
+    snprintf(buf, size, "%s %s", city_part, weather_part);
 }
 
 static const char *AppUI_LightLevelShort(uint16_t light_adc)

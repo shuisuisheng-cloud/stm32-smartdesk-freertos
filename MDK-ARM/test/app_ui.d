@@ -3,6 +3,7 @@ test\app_ui.o: ..\User\App\app_ui.h
 test\app_ui.o: F:\qianrushi\ARM\ARMCC\Bin\..\include\stdint.h
 test\app_ui.o: ..\User\App\app_clock.h
 test\app_ui.o: ..\User\App\app_data.h
+test\app_ui.o: ..\User\App\app_weather.h
 test\app_ui.o: ../User/OLED/ssd1306.h
 test\app_ui.o: ../Core/Inc/main.h
 test\app_ui.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h

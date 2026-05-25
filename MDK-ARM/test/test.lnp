@@ -7,6 +7,7 @@
 "test\app_sensor.o"
 "test\app_actuator.o"
 "test\app_esp8266.o"
+"test\app_weather.o"
 "test\main.o"
 "test\stm32f4xx_it.o"
 "test\stm32f4xx_hal_msp.o"

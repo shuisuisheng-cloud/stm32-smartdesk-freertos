@@ -12,5 +12,8 @@ uint8_t AppESP8266_IsWiFiConnected(void);
 uint8_t AppESP8266_PingTest(void);
 uint8_t AppESP8266_ConfigSNTP(void);
 uint8_t AppESP8266_GetSNTPTime(char *out, uint16_t out_len);
+uint8_t AppESP8266_PingHost(const char *host);
+uint8_t AppESP8266_TestTcpConnect(const char *host, uint16_t port);
+uint8_t AppESP8266_HTTPGet(const char *host, const char *path, uint8_t use_ssl, char *out, uint16_t out_len, uint32_t timeout);
 
 #endif /* __APP_ESP8266_H__ */

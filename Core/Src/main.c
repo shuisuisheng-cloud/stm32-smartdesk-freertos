@@ -29,6 +29,7 @@
 #include "app_key.h"
 #include "app_sensor.h"
 #include "app_ui.h"
+#include "app_weather.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -136,6 +137,7 @@ int main(void)
   I2C_Scan();
   AppData_Init();
   AppClock_Init();
+  AppWeather_Init();
   AppESP8266_Init();
   AppData_Get()->esp_ok = AppESP8266_TestAT();
   AppData_Get()->wifi_ok = 0U;
@@ -156,6 +158,7 @@ int main(void)
                           if(AppClock_SetTimeFromSNTPString(sntp_time_buf) != 0U)
                           {
                               AppData_Get()->time_synced = 1U;
+                              AppWeather_UpdateFromESP8266();
                           }
                           else
                           {

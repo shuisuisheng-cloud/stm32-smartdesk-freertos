@@ -42,3 +42,4 @@ test\main.o: ../User/App/app_esp8266.h
 test\main.o: ../User/App/app_key.h
 test\main.o: ../User/App/app_sensor.h
 test\main.o: ../User/App/app_ui.h
+test\main.o: ../User/App/app_weather.h
