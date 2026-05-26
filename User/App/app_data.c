@@ -14,6 +14,7 @@ void AppData_Init(void)
     smartdesk_data.fan_on = 0U;
     smartdesk_data.light_on = 0U;
     smartdesk_data.alarm_on = 0U;
+    smartdesk_data.buzzer_on = 0U;
     smartdesk_data.mode = 0U;
     smartdesk_data.esp_ok = 0U;
     smartdesk_data.wifi_ok = 0U;
@@ -39,6 +40,17 @@ void AppData_NextMode(void)
         smartdesk_data.mode = 0U;
     }
 
+    smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
+}
+
+void AppData_SetMode(uint8_t mode)
+{
+    if (mode > 3U)
+    {
+        mode = 0U;
+    }
+
+    smartdesk_data.mode = mode;
     smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
 }
 

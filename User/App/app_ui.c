@@ -1,7 +1,9 @@
 #include "app_ui.h"
 
 #include "app_clock.h"
+#include "app_actuator.h"
 #include "app_data.h"
+#include "app_voice.h"
 #include "app_weather.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
@@ -205,19 +207,31 @@ static void AppUI_DrawDevice(void)
     AppUI_Clear();
     ssd1306_WriteString("Device", Font_7x10, White);
 
-    ssd1306_SetCursor(0, 12);
-    snprintf(line, sizeof(line), "Fan:%s", data->fan_on ? "ON" : "OFF");
+    ssd1306_SetCursor(0, 10);
+    snprintf(line, sizeof(line), "Fan:%s Light:%s", data->fan_on ? "ON" : "OFF", data->light_on ? "ON" : "OFF");
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 24);
-    snprintf(line, sizeof(line), "Light:%s", data->light_on ? "ON" : "OFF");
-    ssd1306_WriteString(line, Font_7x10, White);
-
-    ssd1306_SetCursor(0, 36);
+    ssd1306_SetCursor(0, 20);
     snprintf(line, sizeof(line), "Alarm:%s", data->alarm_on ? "ON" : "OFF");
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 48);
+    ssd1306_SetCursor(0, 30);
+    snprintf(line,
+             sizeof(line),
+#if APP_BUZZER_ENABLE
+             "Buzz:%s",
+             data->buzzer_on ? "ON" : "OFF"
+#else
+             "Buzz:DIS"
+#endif
+             );
+    ssd1306_WriteString(line, Font_7x10, White);
+
+    ssd1306_SetCursor(0, 40);
+    snprintf(line, sizeof(line), "Voice:%s", APP_VOICE_ENABLE ? "ON" : "DIS");
+    ssd1306_WriteString(line, Font_7x10, White);
+
+    ssd1306_SetCursor(0, 52);
     snprintf(line, sizeof(line), "Mode:%s", AppData_GetModeName(data->mode));
     ssd1306_WriteString(line, Font_7x10, White);
 }

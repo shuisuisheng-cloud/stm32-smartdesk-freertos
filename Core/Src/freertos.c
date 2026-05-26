@@ -34,6 +34,7 @@
 #include "app_actuator.h"
 #include "app_esp8266.h"
 #include "app_weather.h"
+#include "app_voice.h"
 #include "ssd1306.h"
 #include "ssd1306_fonts.h"
 
@@ -59,6 +60,7 @@
 static uint8_t current_page = 0U;
 static uint32_t app_core_slow_tick = 0U;
 static uint32_t app_core_ui_tick = 0U;
+static uint32_t app_core_voice_tick = 0U;
 static GPIO_PinState last_pc13_raw = GPIO_PIN_SET;
 static uint8_t oled_i2c_ready = 0U;
 extern I2C_HandleTypeDef hi2c1;
@@ -161,7 +163,9 @@ void AppFreeRTOS_AppCoreTaskLoop(void)
 
     app_core_slow_tick = HAL_GetTick();
     app_core_ui_tick = HAL_GetTick();
+    app_core_voice_tick = HAL_GetTick();
     AppKey_Init();
+    AppVoice_Init();
     last_pc13_raw = HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13);
     Debug_OLED_CheckAndInit();
     if (oled_i2c_ready != 0U)
@@ -184,6 +188,50 @@ void AppFreeRTOS_AppCoreTaskLoop(void)
             app_core_slow_tick = HAL_GetTick();
             AppClock_Update();
             AppSensor_UpdateData();
+        }
+
+        if ((HAL_GetTick() - app_core_voice_tick) >= 50U)
+        {
+            uint8_t voice_cmd;
+
+            app_core_voice_tick = HAL_GetTick();
+            AppVoice_Update();
+            voice_cmd = AppVoice_GetLastCommand();
+
+            if (voice_cmd != APP_VOICE_CMD_NONE)
+            {
+                if (voice_cmd == APP_VOICE_CMD_PAGE_NEXT)
+                {
+                    current_page = (uint8_t)((current_page + 1U) % APP_UI_PAGE_COUNT);
+                    printf("[UI] page=%d\r\n", current_page);
+                }
+                else if (voice_cmd == APP_VOICE_CMD_MODE_AUTO)
+                {
+                    AppData_SetMode(0U);
+                    printf("[MODE] changed\r\n");
+                }
+                else if (voice_cmd == APP_VOICE_CMD_MODE_MANUAL)
+                {
+                    AppData_SetMode(1U);
+                    printf("[MODE] changed\r\n");
+                }
+                else if (voice_cmd == APP_VOICE_CMD_ALARM_OFF)
+                {
+                    AppClock_ClearAlarm();
+                    AppActuator_BuzzerOff();
+                }
+                else if (voice_cmd == APP_VOICE_CMD_WEATHER_PAGE)
+                {
+                    current_page = 4U;
+                    printf("[UI] page=%d\r\n", current_page);
+                }
+
+                AppVoice_ClearCommand();
+                if (oled_i2c_ready != 0U)
+                {
+                    AppUI_ShowPage(current_page);
+                }
+            }
         }
 
         key_event = AppKey_Scan();
