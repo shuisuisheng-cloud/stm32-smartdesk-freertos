@@ -8,8 +8,6 @@
 
 #include <stdio.h>
 
-#define APP_UI_PAGE_COUNT 5U
-
 static void AppUI_DrawHome(void);
 static void AppUI_DrawEnvironment(void);
 static void AppUI_DrawWeather(void);
@@ -29,7 +27,10 @@ void AppUI_Init(void)
 
 void AppUI_ShowPage(uint8_t page)
 {
-    switch (page % APP_UI_PAGE_COUNT)
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+
+    switch (page)
     {
         case 0:
             AppUI_DrawHome();
@@ -40,7 +41,7 @@ void AppUI_ShowPage(uint8_t page)
             break;
 
         case 2:
-            AppUI_DrawWeather();
+            AppUI_DrawDevice();
             break;
 
         case 3:
@@ -48,8 +49,11 @@ void AppUI_ShowPage(uint8_t page)
             break;
 
         case 4:
+            AppUI_DrawWeather();
+            break;
+
         default:
-            AppUI_DrawDevice();
+            AppUI_DrawHome();
             break;
     }
 

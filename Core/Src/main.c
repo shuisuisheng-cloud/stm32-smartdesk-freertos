@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -55,6 +56,20 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
+/* Definitions for appCoreTask */
+osThreadId_t appCoreTaskHandle;
+const osThreadAttr_t appCoreTask_attributes = {
+  .name = "appCoreTask",
+  .stack_size = 2048 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for weatherTask */
+osThreadId_t weatherTaskHandle;
+const osThreadAttr_t weatherTask_attributes = {
+  .name = "weatherTask",
+  .stack_size = 2048 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* USER CODE BEGIN PV */
 uint8_t page = 0;
 uint32_t alarm_page_refresh_tick = 0;
@@ -71,7 +86,12 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART1_UART_Init(void);
+void StartAppCoreTask(void *argument);
+void StartWeatherTask(void *argument);
+
 /* USER CODE BEGIN PFP */
+void AppFreeRTOS_AppCoreTaskLoop(void);
+void AppFreeRTOS_WeatherTaskLoop(void);
 
 /* USER CODE END PFP */
 
@@ -83,20 +103,6 @@ int fputc(int ch, FILE *f)
     return ch;
 }
 
-void I2C_Scan(void)
-{
-    printf("I2C Scan Start\r\n");
-
-    for(uint8_t addr = 1; addr < 127; addr++)
-    {
-        if(HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 1, 10) == HAL_OK)
-        {
-            printf("I2C Device Found: 0x%02X\r\n", addr);
-        }
-    }
-
-    printf("I2C Scan End\r\n");
-}
 /* USER CODE END 0 */
 
 /**
@@ -134,59 +140,56 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   printf("System Start\r\n");
-  I2C_Scan();
   AppData_Init();
   AppClock_Init();
   AppWeather_Init();
   AppESP8266_Init();
-  AppData_Get()->esp_ok = AppESP8266_TestAT();
   AppData_Get()->wifi_ok = 0U;
   AppData_Get()->time_synced = 0U;
-  if(AppData_Get()->esp_ok != 0U)
-  {
-      if(AppESP8266_SetStationMode() != 0U)
-      {
-          AppData_Get()->wifi_ok = AppESP8266_ConnectWiFi(0, 0);
-          if(AppData_Get()->wifi_ok != 0U)
-          {
-              if(AppESP8266_PingTest() != 0U)
-              {
-                  if(AppESP8266_ConfigSNTP() != 0U)
-                  {
-                      if(AppESP8266_GetSNTPTime(sntp_time_buf, sizeof(sntp_time_buf)) != 0U)
-                      {
-                          if(AppClock_SetTimeFromSNTPString(sntp_time_buf) != 0U)
-                          {
-                              AppData_Get()->time_synced = 1U;
-                          }
-                          else
-                          {
-                              AppData_Get()->time_synced = 0U;
-                          }
-                      }
-                      else
-                      {
-                          AppData_Get()->time_synced = 0U;
-                      }
-                  }
-                  else
-                  {
-                      AppData_Get()->time_synced = 0U;
-                  }
-              }
-              else
-              {
-                  AppData_Get()->time_synced = 0U;
-              }
-          }
-      }
-  }
   AppActuator_Init();
   AppKey_Init();
   AppSensor_Init();
-  AppUI_Init();
-  AppUI_ShowPage(page);
+  /* OLED init/draw is temporarily moved to appCoreTask for I2C debug. */
   /* USER CODE END 2 */
+
+  /* Init scheduler */
+  osKernelInitialize();
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* creation of appCoreTask */
+  appCoreTaskHandle = osThreadNew(StartAppCoreTask, NULL, &appCoreTask_attributes);
+
+  /* creation of weatherTask */
+  weatherTaskHandle = osThreadNew(StartWeatherTask, NULL, &weatherTask_attributes);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -195,55 +198,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    AppClock_Update();
-    AppActuator_Update();
-    AppWeather_Task();
-
-    if((HAL_GetTick() - sensor_update_tick) >= 500U)
-    {
-        sensor_update_tick = HAL_GetTick();
-        AppSensor_UpdateData();
-
-        if(page == 1U)
-        {
-            AppUI_ShowPage(page);
-        }
-    }
-
-    if((HAL_GetTick() - gas_fake_update_tick) >= 3000U)
-    {
-        gas_fake_update_tick = HAL_GetTick();
-        AppData_UpdateFake();
-
-        if((page == 1U) || (page == 4U))
-        {
-            AppUI_ShowPage(page);
-        }
-    }
-    key_event = AppKey_Scan();
-    if(key_event == APP_KEY_EVENT_SHORT)
-    {
-        page++;
-        if(page > 4)
-        {
-            page = 0;
-        }
-
-        AppUI_ShowPage(page);
-    }
-    else if(key_event == APP_KEY_EVENT_LONG)
-    {
-        AppData_NextMode();
-        AppUI_ShowPage(page);
-    }
-
-    if((page == 3U) && ((HAL_GetTick() - alarm_page_refresh_tick) >= 1000U))
-    {
-        alarm_page_refresh_tick = HAL_GetTick();
-        AppUI_ShowPage(page);
-    }
-
-    HAL_Delay(10);
   }
   /* USER CODE END 3 */
 }
@@ -486,8 +440,117 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void App_I2C1_ReInit(void)
+{
+  HAL_I2C_DeInit(&hi2c1);
+  MX_I2C1_Init();
+}
+
+uint8_t App_I2C1_Scan(void)
+{
+  uint8_t oled_addr = 0U;
+
+  for (uint8_t addr = 0x03U; addr <= 0x77U; addr++)
+  {
+    if (HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t)(addr << 1), 2U, 20U) == HAL_OK)
+    {
+      if ((addr == 0x3CU) || (addr == 0x3DU))
+      {
+        oled_addr = addr;
+      }
+    }
+  }
+
+  return oled_addr;
+}
+
+void App_I2C1_BusRecover(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  HAL_I2C_DeInit(&hi2c1);
+
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8 | GPIO_PIN_9, GPIO_PIN_SET);
+  HAL_Delay(1);
+
+  for (uint8_t i = 0U; i < 9U; i++)
+  {
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_RESET);
+    HAL_Delay(1);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+    HAL_Delay(1);
+  }
+
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+  HAL_Delay(1);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_Delay(1);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+  HAL_Delay(1);
+
+  MX_I2C1_Init();
+  printf("[I2C] bus recover done\r\n");
+}
 
 /* USER CODE END 4 */
+
+/* USER CODE BEGIN Header_StartAppCoreTask */
+/**
+  * @brief  Function implementing the appCoreTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartAppCoreTask */
+void StartAppCoreTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  AppFreeRTOS_AppCoreTaskLoop();
+  /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartWeatherTask */
+/**
+* @brief Function implementing the weatherTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartWeatherTask */
+void StartWeatherTask(void *argument)
+{
+  /* USER CODE BEGIN StartWeatherTask */
+  AppFreeRTOS_WeatherTaskLoop();
+  /* USER CODE END StartWeatherTask */
+}
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM10 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM10)
+  {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

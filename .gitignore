@@ -1,1 +1,15 @@
 User/App/app_weather_config.h
+MDK-ARM/test/
+MDK-ARM/*.lst
+MDK-ARM/*.uvguix.*
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.map
+*.htm
+*.dep
+*.lnp
+*.build_log.htm
+User/App/app_weather_config.h

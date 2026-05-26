@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define APP_UI_PAGE_COUNT 5U
+
 void AppUI_Init(void);
 void AppUI_ShowPage(uint8_t page);
 
