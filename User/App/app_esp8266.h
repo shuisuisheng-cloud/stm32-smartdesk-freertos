@@ -16,6 +16,8 @@ uint8_t AppESP8266_GetSNTPTime(char *out, uint16_t out_len);
 uint8_t AppESP8266_PingHost(const char *host);
 uint8_t AppESP8266_TestTcpConnect(const char *host, uint16_t port);
 uint8_t AppESP8266_HTTPGet(const char *host, const char *path, uint8_t use_ssl, char *out, uint16_t out_len, uint32_t timeout);
+uint16_t AppESP8266_SendATCollect(const char *cmd, char *buf, uint16_t size, uint32_t timeout_ms);
+uint16_t AppESP8266_ReadRawAppend(char *buf, uint16_t max_len, uint32_t total_timeout_ms);
 uint16_t AppESP8266_ReadRawResponse(char *buf, uint16_t buf_size, uint32_t timeout_ms);
 
 #endif /* __APP_ESP8266_H__ */
