@@ -8,7 +8,10 @@ typedef struct
     float temperature;
     float humidity;
     uint16_t gas_adc;
+    uint16_t gas_raw;
     uint16_t light_adc;
+    uint8_t gas_alarm;
+    uint8_t gas_percent;
     uint8_t fan_on;
     uint8_t light_on;
     uint8_t alarm_on;

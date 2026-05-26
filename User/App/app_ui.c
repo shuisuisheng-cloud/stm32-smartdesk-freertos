@@ -90,22 +90,26 @@ static void AppUI_DrawEnvironment(void)
     AppUI_Clear();
     ssd1306_WriteString("Env", Font_7x10, White);
 
-    ssd1306_SetCursor(0, 12);
+    ssd1306_SetCursor(0, 10);
     AppUI_FormatFloat1(line, sizeof(line), "T:", data->temperature, "");
     ssd1306_WriteString(line, Font_7x10, White);
-    ssd1306_SetCursor(64, 12);
+    ssd1306_SetCursor(64, 10);
     snprintf(line, sizeof(line), "H:%u%%", (uint16_t)(data->humidity + 0.5f));
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 24);
-    snprintf(line, sizeof(line), "G:%u %s", data->gas_adc, AppData_GetGasLevel(data->gas_adc));
+    ssd1306_SetCursor(0, 20);
+    snprintf(line, sizeof(line), "Gas:%u%%", data->gas_percent);
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 36);
+    ssd1306_SetCursor(0, 30);
+    snprintf(line, sizeof(line), "Gas:%s", data->gas_alarm ? "ALARM" : "OK");
+    ssd1306_WriteString(line, Font_7x10, White);
+
+    ssd1306_SetCursor(0, 40);
     snprintf(line, sizeof(line), "L:%u %s", data->light_adc, AppUI_LightLevelShort(data->light_adc));
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 48);
+    ssd1306_SetCursor(0, 52);
     snprintf(line, sizeof(line), "S:%u", data->comfort_score);
     ssd1306_WriteString(line, Font_7x10, White);
 }

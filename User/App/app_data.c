@@ -1,12 +1,15 @@
 #include "app_data.h"
 
 static SmartDesk_Data_t smartdesk_data;
-static uint8_t fake_gas_index = 0U;
 
 void AppData_Init(void)
 {
     smartdesk_data.temperature = 26.0f;
     smartdesk_data.humidity = 55.0f;
+    smartdesk_data.gas_adc = 800U;
+    smartdesk_data.gas_raw = 800U;
+    smartdesk_data.gas_percent = 19U;
+    smartdesk_data.gas_alarm = 0U;
     smartdesk_data.light_adc = 1200U;
     smartdesk_data.fan_on = 0U;
     smartdesk_data.light_on = 0U;
@@ -15,8 +18,7 @@ void AppData_Init(void)
     smartdesk_data.esp_ok = 0U;
     smartdesk_data.wifi_ok = 0U;
     smartdesk_data.time_synced = 0U;
-    fake_gas_index = 0U;
-    AppData_UpdateFake();
+    smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
 }
 
 SmartDesk_Data_t* AppData_Get(void)
@@ -26,24 +28,6 @@ SmartDesk_Data_t* AppData_Get(void)
 
 void AppData_UpdateFake(void)
 {
-    static const uint16_t fake_gas_values[] = {800U, 1200U, 2000U};
-
-    smartdesk_data.gas_adc = fake_gas_values[fake_gas_index];
-    fake_gas_index++;
-    if (fake_gas_index >= (sizeof(fake_gas_values) / sizeof(fake_gas_values[0])))
-    {
-        fake_gas_index = 0U;
-    }
-
-    if (smartdesk_data.gas_adc >= 1800U)
-    {
-        smartdesk_data.alarm_on = 1U;
-    }
-    else if (smartdesk_data.gas_adc < 1000U)
-    {
-        smartdesk_data.alarm_on = 0U;
-    }
-
     smartdesk_data.comfort_score = AppData_CalcComfortScore(&smartdesk_data);
 }
 

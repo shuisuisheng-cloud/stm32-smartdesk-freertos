@@ -59,7 +59,6 @@
 static uint8_t current_page = 0U;
 static uint32_t app_core_slow_tick = 0U;
 static uint32_t app_core_ui_tick = 0U;
-static uint32_t gas_fake_update_tick = 0U;
 static GPIO_PinState last_pc13_raw = GPIO_PIN_SET;
 static uint8_t oled_i2c_ready = 0U;
 extern I2C_HandleTypeDef hi2c1;
@@ -178,12 +177,6 @@ void AppFreeRTOS_AppCoreTaskLoop(void)
         if (pc13_raw != last_pc13_raw)
         {
             last_pc13_raw = pc13_raw;
-        }
-
-        if ((HAL_GetTick() - gas_fake_update_tick) >= 3000U)
-        {
-            gas_fake_update_tick = HAL_GetTick();
-            AppData_UpdateFake();
         }
 
         if ((HAL_GetTick() - app_core_slow_tick) >= 100U)
