@@ -12,4 +12,5 @@ MDK-ARM/*.uvguix.*
 *.dep
 *.lnp
 *.build_log.htm
+*.lst
 User/App/app_weather_config.h
