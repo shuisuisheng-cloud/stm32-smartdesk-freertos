@@ -61,10 +61,19 @@ void AppWeather_Init(void)
 void AppWeather_Task(void)
 {
     uint8_t ok;
+    uint32_t now;
+    uint32_t interval;
 
-    if (AppWeather_ShouldUpdate() != 0U)
+    now = HAL_GetTick();
+    interval = now - weather_last_update_tick;
+
+    if ((weather_data.updating == 0U) &&
+        ((weather_last_update_tick == 0U) ||
+         (interval >= WEATHER_UPDATE_INTERVAL_MS) ||
+         (AppWeather_ShouldUpdate() != 0U)))
     {
-        weather_data.updating = 1U;
+        printf("[WEATHER TASK] due update\r\n");
+        weather_last_update_tick = now;
         ok = AppWeather_UpdateFromESP8266();
         weather_data.updating = 0U;
         printf("[NET] Weather %s\r\n", ok ? "OK" : "FAIL");

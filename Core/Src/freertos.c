@@ -238,6 +238,7 @@ void AppFreeRTOS_WeatherTaskLoop(void)
     char sntp_time_buf[128];
     uint32_t last_wifi_retry_tick = 0U;
     uint32_t last_wifi_status_tick = 0U;
+    uint32_t last_weather_loop_log_tick = 0U;
 
     osDelay(5000);
 
@@ -285,6 +286,13 @@ void AppFreeRTOS_WeatherTaskLoop(void)
         }
         else
         {
+            if ((last_weather_loop_log_tick == 0U) ||
+                ((HAL_GetTick() - last_weather_loop_log_tick) >= 30000U))
+            {
+                last_weather_loop_log_tick = HAL_GetTick();
+                printf("[RTOS] weatherTask loop wifi_ok=%d\r\n", wifi_ok);
+            }
+
             if ((HAL_GetTick() - last_wifi_status_tick) >= 30000U)
             {
                 last_wifi_status_tick = HAL_GetTick();
