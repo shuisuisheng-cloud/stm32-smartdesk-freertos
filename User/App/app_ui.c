@@ -208,14 +208,26 @@ static void AppUI_DrawDevice(void)
     ssd1306_WriteString("Device", Font_7x10, White);
 
     ssd1306_SetCursor(0, 10);
-    snprintf(line, sizeof(line), "Fan:%s Light:%s", data->fan_on ? "ON" : "OFF", data->light_on ? "ON" : "OFF");
+    snprintf(line,
+             sizeof(line),
+#if APP_FAN_ENABLE
+             "Fan:%s",
+             data->fan_on ? "ON" : "OFF"
+#else
+             "Fan:DIS"
+#endif
+             );
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 20);
-    snprintf(line, sizeof(line), "Alarm:%s", data->alarm_on ? "ON" : "OFF");
+    snprintf(line, sizeof(line), "Light:%s", data->light_on ? "ON" : "OFF");
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 30);
+    snprintf(line, sizeof(line), "Alarm:%s", data->alarm_on ? "ON" : "OFF");
+    ssd1306_WriteString(line, Font_7x10, White);
+
+    ssd1306_SetCursor(0, 40);
     snprintf(line,
              sizeof(line),
 #if APP_BUZZER_ENABLE
@@ -227,8 +239,8 @@ static void AppUI_DrawDevice(void)
              );
     ssd1306_WriteString(line, Font_7x10, White);
 
-    ssd1306_SetCursor(0, 40);
-    snprintf(line, sizeof(line), "Voice:%s", APP_VOICE_ENABLE ? "ON" : "DIS");
+    ssd1306_SetCursor(72, 40);
+    snprintf(line, sizeof(line), "V:%s", APP_VOICE_ENABLE ? "ON" : "DIS");
     ssd1306_WriteString(line, Font_7x10, White);
 
     ssd1306_SetCursor(0, 52);

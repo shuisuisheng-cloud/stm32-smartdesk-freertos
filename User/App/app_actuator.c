@@ -13,10 +13,16 @@ static uint32_t buzzer_last_change_tick = 0U;
 
 void AppActuator_Init(void)
 {
+    SmartDesk_Data_t *data = AppData_Get();
+
     led_last_toggle_tick = HAL_GetTick();
     buzzer_last_change_tick = HAL_GetTick();
+    data->fan_enabled = APP_FAN_ENABLE ? 1U : 0U;
+    data->fan_on = 0U;
+    data->fan_speed_percent = 0U;
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
     AppActuator_BuzzerOff();
+    AppActuator_FanOff();
 }
 
 void AppActuator_Update(void)
@@ -45,6 +51,15 @@ void AppActuator_Update(void)
     {
         buzzer_last_change_tick = now;
         AppActuator_BuzzerOff();
+    }
+
+    if (data->fan_on != 0U)
+    {
+        AppActuator_FanOn();
+    }
+    else
+    {
+        AppActuator_FanOff();
     }
 }
 
@@ -75,5 +90,87 @@ void AppActuator_BuzzerToggle(void)
     else
     {
         AppActuator_BuzzerOn();
+    }
+}
+
+void AppActuator_FanOn(void)
+{
+    SmartDesk_Data_t *data = AppData_Get();
+
+    data->fan_enabled = APP_FAN_ENABLE ? 1U : 0U;
+    data->fan_on = 1U;
+    if (data->fan_speed_percent == 0U)
+    {
+        data->fan_speed_percent = 100U;
+    }
+
+#if APP_FAN_ENABLE
+#if APP_FAN_USE_PWM
+    /*
+     * TODO: Set PWM duty cycle after the fan driver TIM channel is configured.
+     */
+#else
+    HAL_GPIO_WritePin(APP_FAN_GPIO_PORT, APP_FAN_GPIO_PIN, APP_FAN_ACTIVE_LEVEL);
+#endif
+#endif
+}
+
+void AppActuator_FanOff(void)
+{
+    SmartDesk_Data_t *data = AppData_Get();
+
+    data->fan_enabled = APP_FAN_ENABLE ? 1U : 0U;
+    data->fan_on = 0U;
+    data->fan_speed_percent = 0U;
+
+#if APP_FAN_ENABLE
+#if APP_FAN_USE_PWM
+    /*
+     * TODO: Set PWM duty cycle to 0 after the fan driver TIM channel is configured.
+     */
+#else
+    HAL_GPIO_WritePin(APP_FAN_GPIO_PORT,
+                      APP_FAN_GPIO_PIN,
+                      (APP_FAN_ACTIVE_LEVEL == GPIO_PIN_SET) ? GPIO_PIN_RESET : GPIO_PIN_SET);
+#endif
+#endif
+}
+
+void AppActuator_FanSetSpeed(uint8_t percent)
+{
+    SmartDesk_Data_t *data = AppData_Get();
+
+    if (percent > 100U)
+    {
+        percent = 100U;
+    }
+
+    data->fan_enabled = APP_FAN_ENABLE ? 1U : 0U;
+    data->fan_speed_percent = percent;
+    data->fan_on = (percent != 0U) ? 1U : 0U;
+
+#if APP_FAN_ENABLE
+#if APP_FAN_USE_PWM
+    /*
+     * TODO: Convert percent to PWM duty cycle after the TIM channel is configured.
+     */
+#else
+    HAL_GPIO_WritePin(APP_FAN_GPIO_PORT,
+                      APP_FAN_GPIO_PIN,
+                      (percent != 0U) ? APP_FAN_ACTIVE_LEVEL :
+                      ((APP_FAN_ACTIVE_LEVEL == GPIO_PIN_SET) ? GPIO_PIN_RESET : GPIO_PIN_SET));
+#endif
+#endif
+}
+
+void AppActuator_FanToggle(void)
+{
+    if (AppData_Get()->fan_on != 0U)
+    {
+        AppActuator_FanOff();
+    }
+    else
+    {
+        AppActuator_FanOn();
     }
 }

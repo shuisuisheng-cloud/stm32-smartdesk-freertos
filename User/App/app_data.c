@@ -1,5 +1,7 @@
 #include "app_data.h"
 
+#include "app_actuator.h"
+
 static SmartDesk_Data_t smartdesk_data;
 
 void AppData_Init(void)
@@ -11,7 +13,9 @@ void AppData_Init(void)
     smartdesk_data.gas_percent = 19U;
     smartdesk_data.gas_alarm = 0U;
     smartdesk_data.light_adc = 1200U;
+    smartdesk_data.fan_enabled = APP_FAN_ENABLE ? 1U : 0U;
     smartdesk_data.fan_on = 0U;
+    smartdesk_data.fan_speed_percent = 0U;
     smartdesk_data.light_on = 0U;
     smartdesk_data.alarm_on = 0U;
     smartdesk_data.buzzer_on = 0U;

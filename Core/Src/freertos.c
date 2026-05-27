@@ -225,6 +225,20 @@ void AppFreeRTOS_AppCoreTaskLoop(void)
                     current_page = 4U;
                     printf("[UI] page=%d\r\n", current_page);
                 }
+                else if ((voice_cmd == APP_VOICE_CMD_FAN_ON) ||
+                         (voice_cmd == APP_VOICE_CMD_AC_ON))
+                {
+                    AppActuator_FanOn();
+                }
+                else if ((voice_cmd == APP_VOICE_CMD_FAN_OFF) ||
+                         (voice_cmd == APP_VOICE_CMD_AC_OFF))
+                {
+                    AppActuator_FanOff();
+                }
+                else if (voice_cmd == APP_VOICE_CMD_FAN_TOGGLE)
+                {
+                    AppActuator_FanToggle();
+                }
 
                 AppVoice_ClearCommand();
                 if (oled_i2c_ready != 0U)

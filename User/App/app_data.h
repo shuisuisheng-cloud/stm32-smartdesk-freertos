@@ -12,7 +12,9 @@ typedef struct
     uint16_t light_adc;
     uint8_t gas_alarm;
     uint8_t gas_percent;
+    uint8_t fan_enabled;
     uint8_t fan_on;
+    uint8_t fan_speed_percent;
     uint8_t light_on;
     uint8_t alarm_on;
     uint8_t buzzer_on;
