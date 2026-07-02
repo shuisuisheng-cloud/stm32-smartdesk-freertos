@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include "board_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +63,7 @@ int fputc(int ch, FILE *f)
 
     (void)f;
 
-    HAL_UART_Transmit(&huart2,
+    HAL_UART_Transmit(BOARD_DEBUG_UART_HANDLE,
                       &data,
                       1,
                       HAL_MAX_DELAY);
@@ -79,7 +80,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	uint8_t test_message[] = "USART2 test OK\r\n";
 	uint32_t count =0;
   /* USER CODE END 1 */
 
@@ -103,6 +103,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+	printf("board:%s\r\n",BOARD_NAME);
 	printf("STM32 Environment Terminal V2 boot OK\r\n");
   /* USER CODE END 2 */
 
@@ -112,7 +113,7 @@ int main(void)
   {
 		printf("count = %lu\r\n", (unsigned long)count);
     count++;
-		HAL_GPIO_TogglePin(LED_D2_GPIO_Port, LED_D2_Pin);
+		HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT, BOARD_LED_GPIO_PIN);
     HAL_Delay(1000);
     /* USER CODE END WHILE */
 
