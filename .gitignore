@@ -14,3 +14,29 @@ MDK-ARM/*.uvguix.*
 *.build_log.htm
 *.lst
 User/App/app_weather_config.h
+
+
+
+# Keil build outputs
+**/MDK-ARM/Objects/
+**/MDK-ARM/Listings/
+**/*.o
+**/*.d
+**/*.crf
+**/*.axf
+**/*.hex
+**/*.bin
+**/*.map
+**/*.build_log.htm
+**/*.dep
+**/*.lnp
+**/*.uvguix.*
+
+# Unused CMSIS components in STM32 V2
+v2_f407_core_board/Drivers/CMSIS/NN/
+v2_f407_core_board/Drivers/CMSIS/DSP/
+
+
+# Keil local user/debug settings
+**/*.uvoptx
+**/MDK-ARM/DebugConfig/
