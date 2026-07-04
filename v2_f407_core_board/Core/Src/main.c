@@ -80,7 +80,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	uint32_t count =0;
+	GPIO_PinState key_s1_status = GPIO_PIN_RESET;
+	GPIO_PinState last_key_s1_status=BOARD_KEY_INACTIVE_LEVEL;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -111,10 +112,25 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		printf("count = %lu\r\n", (unsigned long)count);
-    count++;
-		HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT, BOARD_LED_GPIO_PIN);
-    HAL_Delay(1000);
+		//printf("count = %lu\r\n", (unsigned long)count);
+    //count++;
+		//HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT, BOARD_LED_GPIO_PIN);
+		key_s1_status=HAL_GPIO_ReadPin(BOARD_KEY_GPIO_PORT,BOARD_KEY_GPIO_PIN);
+		if (key_s1_status != last_key_s1_status){
+			HAL_Delay(20);
+			key_s1_status = HAL_GPIO_ReadPin(BOARD_KEY_GPIO_PORT,
+                                BOARD_KEY_GPIO_PIN);
+			if(key_s1_status!=last_key_s1_status){
+				if (key_s1_status == BOARD_KEY_ACTIVE_LEVEL){
+					printf("KEY PRESSED\r\n");
+					HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT,BOARD_LED_GPIO_PIN);
+				}
+				else{
+					printf("KEY RELEASED\r\n");
+				}
+				last_key_s1_status=key_s1_status;}
+    }
+		HAL_Delay(5);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -213,6 +229,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_D2_GPIO_Port, LED_D2_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : KEY_S1_Pin */
+  GPIO_InitStruct.Pin = KEY_S1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(KEY_S1_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED_D2_Pin */
   GPIO_InitStruct.Pin = LED_D2_Pin;
