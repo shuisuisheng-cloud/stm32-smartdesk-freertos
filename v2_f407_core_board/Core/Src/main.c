@@ -80,8 +80,10 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	GPIO_PinState key_s1_status = GPIO_PIN_RESET;
+	GPIO_PinState key_s1_status = BOARD_KEY_INACTIVE_LEVEL;
 	GPIO_PinState last_key_s1_status=BOARD_KEY_INACTIVE_LEVEL;
+	GPIO_PinState waiting_s1_status=BOARD_KEY_INACTIVE_LEVEL;
+	uint32_t start_time = 0U;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -116,25 +118,25 @@ int main(void)
     //count++;
 		//HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT, BOARD_LED_GPIO_PIN);
 		key_s1_status=HAL_GPIO_ReadPin(BOARD_KEY_GPIO_PORT,BOARD_KEY_GPIO_PIN);
-		if (key_s1_status != last_key_s1_status){
-			HAL_Delay(20);
-			key_s1_status = HAL_GPIO_ReadPin(BOARD_KEY_GPIO_PORT,
-                                BOARD_KEY_GPIO_PIN);
-			if(key_s1_status!=last_key_s1_status){
-				if (key_s1_status == BOARD_KEY_ACTIVE_LEVEL){
-					printf("KEY PRESSED\r\n");
+		if (waiting_s1_status != key_s1_status){
+				start_time=HAL_GetTick();
+				waiting_s1_status = key_s1_status;
+			}
+			if ( HAL_GetTick()-start_time>=20U && waiting_s1_status !=last_key_s1_status){
+				last_key_s1_status=waiting_s1_status;
+				if (last_key_s1_status ==BOARD_KEY_ACTIVE_LEVEL){
 					HAL_GPIO_TogglePin(BOARD_LED_GPIO_PORT,BOARD_LED_GPIO_PIN);
+					printf("KEY PRESSED\r\n");
 				}
-				else{
-					printf("KEY RELEASED\r\n");
-				}
-				last_key_s1_status=key_s1_status;}
-    }
-		HAL_Delay(5);
+				else if (last_key_s1_status==BOARD_KEY_INACTIVE_LEVEL){
+					printf("KEY RELEASED\r\n");}
+				
+			}
+					
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+   }
   /* USER CODE END 3 */
 }
 
