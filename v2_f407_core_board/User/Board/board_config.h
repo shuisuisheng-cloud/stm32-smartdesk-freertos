@@ -18,6 +18,8 @@ extern UART_HandleTypeDef huart2;
 #define BOARD_KEY_GPIO_PIN         KEY_S1_Pin
 #define BOARD_KEY_ACTIVE_LEVEL    GPIO_PIN_SET
 #define BOARD_KEY_INACTIVE_LEVEL  GPIO_PIN_RESET
+#define BOARD_DHT11_GPIO_PORT     DHT11_DATA_GPIO_Port
+#define BOARD_DHT11_GPIO_PIN      DHT11_DATA_Pin
 
 /* Debug UART: USART2 */
 #define BOARD_DEBUG_UART_HANDLE    (&huart2)

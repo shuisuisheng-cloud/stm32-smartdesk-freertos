@@ -41,6 +41,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim6;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -51,6 +53,7 @@ UART_HandleTypeDef huart2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM6_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -69,6 +72,53 @@ int fputc(int ch, FILE *f)
                       HAL_MAX_DELAY);
 
     return ch;
+}
+static void delay_us(uint16_t time){
+	__HAL_TIM_SET_COUNTER(&htim6,0);
+	while (__HAL_TIM_GET_COUNTER(&htim6) < time){
+		}
+	
+	}
+static void DHT11_Data_SetOutput(void){
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin=BOARD_DHT11_GPIO_PIN;
+	GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_OD;
+	GPIO_InitStruct.Pull=GPIO_NOPULL;
+	GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(BOARD_DHT11_GPIO_PORT,&GPIO_InitStruct);
+}
+static void DHT11_Data_SetInput(void){
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	GPIO_InitStruct.Pin=BOARD_DHT11_GPIO_PIN;
+	GPIO_InitStruct.Mode=GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull=GPIO_NOPULL;
+	HAL_GPIO_Init(BOARD_DHT11_GPIO_PORT,&GPIO_InitStruct);
+}
+static uint8_t DHT11_WaitForLevel(
+    GPIO_PinState target_level,
+    uint16_t timeout_us
+){
+	__HAL_TIM_SET_COUNTER(&htim6,0);
+	while  (HAL_GPIO_ReadPin(BOARD_DHT11_GPIO_PORT,BOARD_DHT11_GPIO_PIN)!=target_level){
+		if (__HAL_TIM_GET_COUNTER(&htim6)>=timeout_us){
+			return 0;}
+		}
+	return 1;
+	}
+static uint8_t DHT11_CheckResponse(void){
+	DHT11_Data_SetOutput();
+	HAL_GPIO_WritePin(BOARD_DHT11_GPIO_PORT,BOARD_DHT11_GPIO_PIN,GPIO_PIN_RESET);
+	HAL_Delay(20);
+	HAL_GPIO_WritePin(BOARD_DHT11_GPIO_PORT,BOARD_DHT11_GPIO_PIN,GPIO_PIN_SET);
+	delay_us(30);
+	DHT11_Data_SetInput();
+	if (!DHT11_WaitForLevel(GPIO_PIN_RESET,100)){
+		return 0;}
+	if (!DHT11_WaitForLevel(GPIO_PIN_SET,100)){
+		return 0;}
+	if (!DHT11_WaitForLevel(GPIO_PIN_RESET,100)){
+		return 0;}
+	return 1;
 }
 /* USER CODE END 0 */
 
@@ -105,9 +155,20 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 	printf("board:%s\r\n",BOARD_NAME);
 	printf("STM32 Environment Terminal V2 boot OK\r\n");
+	printf("DHT11 idle level: %d\r\n",
+       HAL_GPIO_ReadPin(BOARD_DHT11_GPIO_PORT,
+                        BOARD_DHT11_GPIO_PIN));
+	HAL_TIM_Base_Start(&htim6);
+	HAL_Delay(1000);
+	if (DHT11_CheckResponse()){
+		printf("DHT11 response: OK\r\n");}
+	else{
+		printf("DHT11 response: TIMEOUT\r\n");
+	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -182,6 +243,44 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 15;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 65535;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -227,10 +326,21 @@ static void MX_GPIO_Init(void)
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(DHT11_DATA_GPIO_Port, DHT11_DATA_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_D2_GPIO_Port, LED_D2_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin : DHT11_DATA_Pin */
+  GPIO_InitStruct.Pin = DHT11_DATA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(DHT11_DATA_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : KEY_S1_Pin */
   GPIO_InitStruct.Pin = KEY_S1_Pin;
