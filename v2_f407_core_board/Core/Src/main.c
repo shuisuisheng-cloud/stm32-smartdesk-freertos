@@ -60,6 +60,7 @@ static void MX_TIM6_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static int8_t dht11_failed_bit;
 int fputc(int ch, FILE *f)
 {
     uint8_t data = (uint8_t)ch;
@@ -120,6 +121,50 @@ static uint8_t DHT11_CheckResponse(void){
 		return 0;}
 	return 1;
 }
+static int8_t DHT11_ReadBit(void){
+	GPIO_PinState sampled_level;
+	if(!DHT11_WaitForLevel(GPIO_PIN_SET,100)){
+		return -1;}
+	delay_us(40);
+	sampled_level=HAL_GPIO_ReadPin(BOARD_DHT11_GPIO_PORT,BOARD_DHT11_GPIO_PIN);
+	if(!DHT11_WaitForLevel(GPIO_PIN_RESET,100)){
+		return -1;}
+	if(sampled_level==GPIO_PIN_SET){
+		return 1;}
+	else{
+		return 0;}
+}
+static uint8_t DHT11_ReadData(uint8_t data[5]){
+	uint8_t i = 0U;
+	uint8_t byte_index;
+	uint8_t bit_index;
+	int8_t level;
+	dht11_failed_bit = -1;
+	for (uint8_t j = 0; j < 5; j++)
+	{
+    data[j] = 0U;
+	}
+	while(i<40){
+		byte_index = i / 8;
+		bit_index = 7 - (i % 8);
+		level=DHT11_ReadBit();
+		if (level==-1){
+			dht11_failed_bit=(int)i;
+			return 0;}
+		if (level==1){
+			data[byte_index] |= (1U << bit_index);
+		}
+		i=i+1;
+	}
+	return  1;
+}
+static uint8_t DHT11_ChecksumIsValid(const uint8_t data[5]){
+	uint8_t check_data=data[0]+data[1]+data[2]+data[3];
+	if (check_data==data[4]){
+		return 1;
+	}
+	return 0;
+}
 /* USER CODE END 0 */
 
 /**
@@ -134,6 +179,7 @@ int main(void)
 	GPIO_PinState last_key_s1_status=BOARD_KEY_INACTIVE_LEVEL;
 	GPIO_PinState waiting_s1_status=BOARD_KEY_INACTIVE_LEVEL;
 	uint32_t start_time = 0U;
+	uint8_t dht11_data[5] = {0};
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -165,7 +211,21 @@ int main(void)
 	HAL_TIM_Base_Start(&htim6);
 	HAL_Delay(1000);
 	if (DHT11_CheckResponse()){
-		printf("DHT11 response: OK\r\n");}
+		if (!DHT11_ReadData(dht11_data))
+		{
+    printf("DHT11 read timeout\r\n");
+		printf("%u\r\n",dht11_failed_bit);
+		}
+		else if (!DHT11_ChecksumIsValid(dht11_data))
+		{
+    printf("DHT11 checksum error\r\n");
+		}
+		else
+		{
+    printf("DHT11 raw: %u %u %u %u %u\r\n",(unsigned int)dht11_data[0],(unsigned int)dht11_data[1],(unsigned int)dht11_data[2],(unsigned int)dht11_data[3],(unsigned int)dht11_data[4]);
+		printf("temperature:%u.%u\r\n",dht11_data[2],dht11_data[3]);
+		}
+	}
 	else{
 		printf("DHT11 response: TIMEOUT\r\n");
 	}
