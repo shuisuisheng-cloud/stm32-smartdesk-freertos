@@ -32,7 +32,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define DHT11_SAMPLE_PERIOD_MS    2000U
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -179,6 +179,7 @@ int main(void)
 	GPIO_PinState last_key_s1_status=BOARD_KEY_INACTIVE_LEVEL;
 	GPIO_PinState waiting_s1_status=BOARD_KEY_INACTIVE_LEVEL;
 	uint32_t start_time = 0U;
+	uint32_t last_dht11_sample_time=0U;
 	uint8_t dht11_data[5] = {0};
   /* USER CODE END 1 */
 
@@ -209,26 +210,6 @@ int main(void)
        HAL_GPIO_ReadPin(BOARD_DHT11_GPIO_PORT,
                         BOARD_DHT11_GPIO_PIN));
 	HAL_TIM_Base_Start(&htim6);
-	HAL_Delay(1000);
-	if (DHT11_CheckResponse()){
-		if (!DHT11_ReadData(dht11_data))
-		{
-    printf("DHT11 read timeout\r\n");
-		printf("%u\r\n",dht11_failed_bit);
-		}
-		else if (!DHT11_ChecksumIsValid(dht11_data))
-		{
-    printf("DHT11 checksum error\r\n");
-		}
-		else
-		{
-    printf("DHT11 raw: %u %u %u %u %u\r\n",(unsigned int)dht11_data[0],(unsigned int)dht11_data[1],(unsigned int)dht11_data[2],(unsigned int)dht11_data[3],(unsigned int)dht11_data[4]);
-		printf("temperature:%u.%u\r\n",dht11_data[2],dht11_data[3]);
-		}
-	}
-	else{
-		printf("DHT11 response: TIMEOUT\r\n");
-	}
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -253,7 +234,29 @@ int main(void)
 					printf("KEY RELEASED\r\n");}
 				
 			}
-					
+		uint32_t now=HAL_GetTick();
+		if (((uint32_t)now-last_dht11_sample_time)>=DHT11_SAMPLE_PERIOD_MS){
+				last_dht11_sample_time=now;
+				if (DHT11_CheckResponse()){
+					if (!DHT11_ReadData(dht11_data))
+				{
+							printf("DHT11 read timeout\r\n");
+							printf("%u\r\n",dht11_failed_bit);
+				}
+				else if (!DHT11_ChecksumIsValid(dht11_data))
+				{	
+							printf("DHT11 checksum error\r\n");
+				}
+				else
+				{
+							printf("DHT11 raw: %u %u %u %u %u\r\n",(unsigned int)dht11_data[0],(unsigned int)dht11_data[1],(unsigned int)dht11_data[2],(unsigned int)dht11_data[3],(unsigned int)dht11_data[4]);
+							printf("temperature:%u.%u\r\n",dht11_data[2],dht11_data[3]);
+				}
+				}
+				else{
+					printf("DHT11 response: TIMEOUT\r\n");
+						}
+			}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
