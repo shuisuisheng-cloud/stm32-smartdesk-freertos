@@ -33,6 +33,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define DHT11_SAMPLE_PERIOD_MS    2000U
+#define UART2_RX_BUFFER_SIZE    64U
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,7 +47,11 @@ TIM_HandleTypeDef htim6;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+static uint8_t uart2_rx_byte = 0U;
+static char uart2_rx_buffer[UART2_RX_BUFFER_SIZE];
 
+static volatile uint16_t uart2_rx_index = 0U;
+static volatile uint8_t uart2_line_ready = 0U;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -210,6 +215,10 @@ int main(void)
        HAL_GPIO_ReadPin(BOARD_DHT11_GPIO_PORT,
                         BOARD_DHT11_GPIO_PIN));
 	HAL_TIM_Base_Start(&htim6);
+	if (HAL_UART_Receive_IT(&huart2, &uart2_rx_byte, 1U) != HAL_OK)
+{
+    Error_Handler();
+}
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -257,6 +266,11 @@ int main(void)
 					printf("DHT11 response: TIMEOUT\r\n");
 						}
 			}
+		if (uart2_line_ready==1U){
+			printf("rx:%s\r\n",uart2_rx_buffer);
+			uart2_rx_index = 0U;
+			uart2_line_ready = 0U;
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -424,7 +438,34 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if (huart->Instance == USART2)
+    {
+				 if (uart2_line_ready == 0U)
+        {
+            if (uart2_rx_byte == '\r')
+            {}
+            else if (uart2_rx_byte == '\n')
+            {
+                if (uart2_rx_index > 0U)
+                {
+                    uart2_rx_buffer[uart2_rx_index]='\0';
+                    uart2_line_ready=1U;
+                }
+            }
+            else
+            {
+                if (uart2_rx_index < UART2_RX_BUFFER_SIZE - 1U)
+                {
+                    uart2_rx_buffer[uart2_rx_index]=uart2_rx_byte;
+                    uart2_rx_index++;
+                }
+    }
+						HAL_UART_Receive_IT(huart, &uart2_rx_byte, 1U);
+	}
+}
+}
 /* USER CODE END 4 */
 
 /**
