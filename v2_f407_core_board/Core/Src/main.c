@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "board_config.h"
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -170,6 +171,20 @@ static uint8_t DHT11_ChecksumIsValid(const uint8_t data[5]){
 	}
 	return 0;
 }
+static uint8_t Board_LED_SetAndVerify(GPIO_PinState target_level)
+{
+    HAL_GPIO_WritePin(BOARD_LED_GPIO_PORT,
+                      BOARD_LED_GPIO_PIN,
+                      target_level);
+
+    if (HAL_GPIO_ReadPin(BOARD_LED_GPIO_PORT,
+                         BOARD_LED_GPIO_PIN) == target_level)
+    {
+        return 1U;
+    }
+
+    return 0U;
+}
 /* USER CODE END 0 */
 
 /**
@@ -268,6 +283,32 @@ int main(void)
 			}
 		if (uart2_line_ready==1U){
 			printf("rx:%s\r\n",uart2_rx_buffer);
+			if (strcmp(uart2_rx_buffer, "led_on") == 0)
+{
+    if (Board_LED_SetAndVerify(BOARD_LED_ACTIVE_LEVEL) == 1U)
+    {
+        printf("ack:led_on:success\r\n");
+    }
+    else
+    {
+        printf("ack:led_on:failed\r\n");
+    }
+}
+else if (strcmp(uart2_rx_buffer, "led_off") == 0)
+{
+    if (Board_LED_SetAndVerify(BOARD_LED_INACTIVE_LEVEL) == 1U)
+    {
+        printf("ack:led_off:success\r\n");
+    }
+    else
+    {
+        printf("ack:led_off:failed\r\n");
+    }
+}
+else
+{
+    printf("ack:%s:failed\r\n", uart2_rx_buffer);
+}
 			uart2_rx_index = 0U;
 			uart2_line_ready = 0U;
 		}
