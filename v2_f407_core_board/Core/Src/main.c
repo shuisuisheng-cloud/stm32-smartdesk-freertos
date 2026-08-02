@@ -54,6 +54,9 @@ static char uart2_rx_buffer[UART2_RX_BUFFER_SIZE];
 static volatile uint16_t uart2_rx_index = 0U;
 static volatile uint8_t uart2_line_ready = 0U;
 static volatile uint8_t uart2_line_invalid = 0U;
+static volatile uint32_t uart2_error_code = HAL_UART_ERROR_NONE;
+static volatile uint8_t uart2_error_pending = 0U;
+static volatile uint8_t uart2_rx_restart_failed = 0U;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -526,6 +529,25 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 						HAL_UART_Receive_IT(huart, &uart2_rx_byte, 1U);
 	}
 }
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+	uint32_t current_error;
+	HAL_StatusTypeDef restart_status;
+	if(huart->Instance == USART2){
+		current_error|=huart->ErrorCode;
+		uart2_error_code=uart2_error_code|current_error;
+		uart2_error_pending=1U;
+		uart2_rx_index=0U;
+		uart2_line_ready=0U;
+		uart2_rx_buffer[0]='\0';
+		uart2_line_invalid=1U;
+		if ((current_error&HAL_UART_ERROR_ORE)!= 0U){
+			restart_status=HAL_UART_Receive_IT(huart,&uart2_rx_byte,1U);
+			if((restart_status!=HAL_OK)){
+				uart2_rx_restart_failed=1U;
+			}
+		}
+	}
 }
 /* USER CODE END 4 */
 
